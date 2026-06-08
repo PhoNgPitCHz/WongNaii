@@ -161,5 +161,26 @@
       }
     ],
     "closedAt": 1780930962190
+  },
+  {
+    "id": "b433a7d4-6bb3-4bed-91b0-78b3c50de274",
+    "restaurantId": "Shinsei Sushi",
+    "partyName": "มา ๆ",
+    "hostName": "Nui",
+    "hostId": "5fa21d10-ff41-4da2-b949-993afecb28c1",
+    "eatTime": "20:00",
+    "requiredPeople": 4,
+    "details": "sdf",
+    "createdAt": 1780931016012,
+    "expiresAt": 1780931916012,
+    "status": "recruiting",
+    "members": [
+      {
+        "id": "5fa21d10-ff41-4da2-b949-993afecb28c1",
+        "name": "Nui",
+        "joinedAt": 1780931016012,
+        "host": true
+      }
+    ]
   }
 ]
