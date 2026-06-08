@@ -37,7 +37,7 @@
     "details": "112",
     "createdAt": 1780927201569,
     "expiresAt": 1780928101569,
-    "status": "recruiting",
+    "status": "closed",
     "members": [
       {
         "id": "f144a1d6-b9d5-4caa-b15d-0f9c1a572254",
@@ -45,6 +45,7 @@
         "joinedAt": 1780927201569,
         "host": true
       }
-    ]
+    ],
+    "closedAt": 1780927240466
   }
 ]
