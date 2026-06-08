@@ -188,5 +188,26 @@
       }
     ],
     "closedAt": 1780931090275
+  },
+  {
+    "id": "2b2c4829-3ad6-4fc4-8827-aad0628eb8e2",
+    "restaurantId": "mogura ari",
+    "partyName": "มา ๆ",
+    "hostName": "Pond",
+    "hostId": "98823b10-89b5-4047-a0cd-152736a71019",
+    "eatTime": "20:00",
+    "requiredPeople": 4,
+    "details": "ำไพ",
+    "createdAt": 1780931121463,
+    "expiresAt": 1780932021463,
+    "status": "recruiting",
+    "members": [
+      {
+        "id": "98823b10-89b5-4047-a0cd-152736a71019",
+        "name": "Pond",
+        "joinedAt": 1780931121463,
+        "host": true
+      }
+    ]
   }
 ]
