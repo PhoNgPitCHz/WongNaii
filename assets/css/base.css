@@ -1,0 +1,158 @@
+/* ========================================================================
+   WongNaii? — Base tokens, reset, theme system
+   ======================================================================== */
+
+:root {
+  --font-display: "SF Pro Display", "Inter", "IBM Plex Sans Thai", system-ui, -apple-system, sans-serif;
+  --font-body:    "SF Pro Text",    "Inter", "IBM Plex Sans Thai", system-ui, sans-serif;
+
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 22px;
+  --radius-xl: 32px;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-8: 3rem;
+  --space-10: 4.5rem;
+
+  --transition-fast: 180ms cubic-bezier(.2,.8,.2,1);
+  --transition-med:  340ms cubic-bezier(.2,.8,.2,1);
+}
+
+/* ---- Light theme (default) ---- */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-base: #fef7f0;
+  --bg-gradient: radial-gradient(1200px 800px at 10% -10%, #ffe2cc 0%, transparent 60%),
+                 radial-gradient(900px 700px at 90% 10%, #ffd6e0 0%, transparent 55%),
+                 radial-gradient(1000px 900px at 50% 110%, #d6e4ff 0%, transparent 60%),
+                 linear-gradient(180deg, #fef7f0, #fff1e6);
+
+  --text-strong: #1a0f0a;
+  --text:        #3a2a22;
+  --text-muted:  #7a655c;
+
+  --glass-bg:     rgba(255, 255, 255, 0.55);
+  --glass-bg-hi:  rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-shadow: 0 8px 32px rgba(120, 60, 20, 0.08),
+                  0 2px 6px rgba(120, 60, 20, 0.05);
+  --glass-inner-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  --accent:        #ff5a36;
+  --accent-hover:  #ff4520;
+  --accent-soft:   rgba(255, 90, 54, 0.12);
+  --accent-text:   #ffffff;
+
+  --heart:         #ff3366;
+
+  --blur: 24px;
+  --blur-sat: 180%;
+}
+
+/* ---- Dark theme ---- */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg-base: #0a0612;
+  --bg-gradient: radial-gradient(1200px 800px at 10% -10%, #2a1845 0%, transparent 60%),
+                 radial-gradient(900px 700px at 90% 10%, #45152e 0%, transparent 55%),
+                 radial-gradient(1000px 900px at 50% 110%, #0a1f3a 0%, transparent 60%),
+                 linear-gradient(180deg, #0a0612, #1a0f2e);
+
+  --text-strong: #fff5ee;
+  --text:        #e8dad0;
+  --text-muted:  #a89a8e;
+
+  --glass-bg:     rgba(255, 255, 255, 0.06);
+  --glass-bg-hi:  rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.6),
+                  0 2px 6px rgba(0, 0, 0, 0.4);
+  --glass-inner-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+
+  --accent:        #ff7a52;
+  --accent-hover:  #ff8e6b;
+  --accent-soft:   rgba(255, 122, 82, 0.18);
+  --accent-text:   #1a0f0a;
+
+  --heart:         #ff5c7a;
+
+  --blur: 28px;
+  --blur-sat: 140%;
+}
+
+/* Respect OS preference if no explicit choice */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --bg-base: #0a0612;
+    --bg-gradient: radial-gradient(1200px 800px at 10% -10%, #2a1845 0%, transparent 60%),
+                   radial-gradient(900px 700px at 90% 10%, #45152e 0%, transparent 55%),
+                   radial-gradient(1000px 900px at 50% 110%, #0a1f3a 0%, transparent 60%),
+                   linear-gradient(180deg, #0a0612, #1a0f2e);
+    --text-strong: #fff5ee;
+    --text:        #e8dad0;
+    --text-muted:  #a89a8e;
+    --glass-bg:     rgba(255, 255, 255, 0.06);
+    --glass-bg-hi:  rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
+    --glass-inner-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    --accent: #ff7a52;
+    --accent-hover: #ff8e6b;
+    --accent-soft: rgba(255, 122, 82, 0.18);
+    --accent-text: #1a0f0a;
+    --heart: #ff5c7a;
+  }
+}
+
+/* ---- Reset ---- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--bg-base);
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
+  min-height: 100vh;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background-color var(--transition-med), color var(--transition-med);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  color: var(--text-strong);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+img { max-width: 100%; display: block; }
+
+/* ---- Layout helpers ---- */
+.container {
+  width: min(1200px, 92%);
+  margin-inline: auto;
+}
+
+.stack > * + * { margin-top: var(--space-4); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

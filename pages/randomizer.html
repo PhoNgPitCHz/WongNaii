@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>WongNaii? · สุ่มร้านตามคำถาม</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/glass.css">
+  <link rel="stylesheet" href="../assets/css/home.css">
+  <link rel="stylesheet" href="../assets/css/all-restaurants.css">
+  <link rel="stylesheet" href="../assets/css/randomizer.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="../" class="brand">WongNaii<span>?</span></a>
+      <div style="display:flex; gap: .5rem">
+        <a href="../" class="glass-button is-ghost">← หน้าแรก</a>
+        <button class="glass-button is-icon" data-theme-toggle title="สลับธีม">☾</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="quiz">
+    <div class="quiz-progress" id="progress"></div>
+    <div class="glass-card quiz-step" id="step">
+      <div class="ar-loading">กำลังโหลดคำถาม...</div>
+    </div>
+  </main>
+
+  <div id="party-modals"></div>
+
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/maintenance.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/identity.js"></script>
+  <script src="../assets/js/party.js"></script>
+  <script src="../assets/js/randomizer.js"></script>
+</body>
+</html>

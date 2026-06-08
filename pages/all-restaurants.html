@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>WongNaii? · ร้านอาหารทั้งหมด</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/glass.css">
+  <link rel="stylesheet" href="../assets/css/home.css">
+  <link rel="stylesheet" href="../assets/css/all-restaurants.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="../" class="brand">WongNaii<span>?</span></a>
+      <div style="display:flex; gap: .5rem">
+        <a href="../" class="glass-button is-ghost">← หน้าแรก</a>
+        <button class="glass-button is-icon" data-theme-toggle title="สลับธีม">☾</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="ar-header">
+      <h1>คุณกำลังประสบในการหาร้านอยู่ใช่หรือไม่</h1>
+      <p>เลือกตัวกรองที่ใช่ — แล้วให้เราหาร้านให้คุณ</p>
+    </div>
+
+    <!-- Filter panel -->
+    <div class="glass-card ar-filters">
+      <div class="ar-filter-group">
+        <label for="filter-zone">ย่าน (Zone)</label>
+        <select id="filter-zone" class="glass-input"><option value="">ทุกย่าน</option></select>
+      </div>
+      <div class="ar-filter-group">
+        <label for="filter-food">ประเภทอาหาร</label>
+        <select id="filter-food" class="glass-input"><option value="">ทุกประเภท</option></select>
+      </div>
+      <div class="ar-filter-group">
+        <label>จำนวนคน</label>
+        <div class="ar-group-sizes" id="filter-group">
+          <button data-size="" class="is-active">ทั้งหมด</button>
+          <button data-size="1">1</button>
+          <button data-size="2">2</button>
+          <button data-size="4">4</button>
+          <button data-size="8">8</button>
+          <button data-size="10">10+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top bar -->
+    <div class="ar-top-bar">
+      <div class="ar-result-count">พบ <strong id="result-count">0</strong> ร้าน</div>
+      <div class="ar-top-actions">
+        <select id="sort-by" class="glass-input">
+          <option value="random">เรียงตาม: สุ่ม</option>
+          <option value="rating-desc">คะแนน (สูง → ต่ำ)</option>
+          <option value="rating-asc">คะแนน (ต่ำ → สูง)</option>
+          <option value="reviews-desc">รีวิวเยอะสุด</option>
+          <option value="name-asc">ชื่อ A–Z</option>
+        </select>
+        <button class="glass-button is-primary" id="btn-add-restaurant">➕ เพิ่มร้าน</button>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div id="grid" class="ar-grid">
+      <div class="ar-loading">กำลังโหลด...</div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="ar-pagination">
+      <button class="glass-button" id="btn-prev">← ย้อนกลับ</button>
+      <span class="page-info">หน้า <strong id="page-current">1</strong> / <strong id="page-total">1</strong></span>
+      <button class="glass-button" id="btn-next">หน้าต่อไป →</button>
+    </div>
+  </main>
+
+  <!-- Add Restaurant Modal -->
+  <div class="glass-modal-scrim" id="modal-add" role="dialog" aria-modal="true">
+    <div class="glass-modal">
+      <h2 style="margin-bottom: var(--space-2)">เพิ่มร้านใหม่</h2>
+      <p style="color: var(--text-muted); margin-bottom: var(--space-5); font-size: .9rem">
+        กรอกข้อมูลพื้นฐาน — AI จะช่วยเติมรายละเอียดที่เหลือให้
+      </p>
+      <form class="add-form" id="add-form">
+        <div class="form-row">
+          <div>
+            <label for="f-submitter">ชื่อคนส่ง</label>
+            <input id="f-submitter" class="glass-input" required>
+          </div>
+          <div>
+            <label for="f-restaurant">ชื่อร้าน *</label>
+            <input id="f-restaurant" class="glass-input" required>
+          </div>
+        </div>
+        <div>
+          <label for="f-review">รีวิว / ทำไมต้องกินร้านนี้ *</label>
+          <textarea id="f-review" class="glass-input" required placeholder="บรรยายสั้น ๆ ว่าทำไมร้านนี้น่าไป"></textarea>
+        </div>
+        <div class="form-row">
+          <div>
+            <label for="f-menu">เมนูแนะนำ</label>
+            <input id="f-menu" class="glass-input">
+          </div>
+          <div>
+            <label for="f-menu-desc">คำอธิบายเมนู</label>
+            <input id="f-menu-desc" class="glass-input">
+          </div>
+        </div>
+        <div class="add-form-status" id="add-status"></div>
+        <div style="display:flex; gap: .75rem; justify-content: flex-end; margin-top: .5rem">
+          <button type="button" class="glass-button" data-modal-close>ยกเลิก</button>
+          <button type="submit" class="glass-button is-primary" id="add-submit">บันทึก (AI auto-fill)</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Party modals get injected by party.js -->
+  <div id="party-modals"></div>
+
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/maintenance.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/identity.js"></script>
+  <script src="../assets/js/party.js"></script>
+  <script src="../assets/js/all-restaurants.js"></script>
+</body>
+</html>

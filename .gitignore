@@ -1,0 +1,6 @@
+_sheet_dump.csv
+.DS_Store
+node_modules/
+.env
+.env.local
+*.log

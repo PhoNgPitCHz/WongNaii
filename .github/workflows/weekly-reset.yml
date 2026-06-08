@@ -1,0 +1,44 @@
+name: Weekly Reset (Sunday 02:00 GMT+7)
+
+# Bangkok = UTC+7, no DST. Sunday 02:00 GMT+7 == Saturday 19:00 UTC.
+# We don't need separate maintenance toggles — the frontend computes the
+# 01:30–02:15 window from the user's wall clock via Intl. The cron only
+# performs the actual reset.
+
+on:
+  schedule:
+    # Saturday 19:00 UTC == Sunday 02:00 Bangkok
+    - cron: "0 19 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Reset likes / parties / chats
+        run: |
+          mkdir -p data/chats
+          echo '{}' > data/likes.json
+          echo '[]' > data/parties.json
+          rm -f data/chats/*.json
+          # keep the chats folder tracked
+          touch data/chats/.gitkeep
+
+      - name: Commit reset
+        run: |
+          git config user.name  "WongNaii Bot"
+          git config user.email "bot@wongnaii.local"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: weekly reset (likes/parties/chats) [skip ci]"
+            git push
+          fi

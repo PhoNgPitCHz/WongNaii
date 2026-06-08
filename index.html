@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fef7f0">
+  <title>WongNaii? — หิวอะไรดีวันนี้</title>
+  <meta name="description" content="WongNaii? — ค้นหาร้านอาหาร สุ่มร้านโดน ๆ และหาเพื่อนกินข้าวด้วยกัน">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/glass.css">
+  <link rel="stylesheet" href="assets/css/home.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="./" class="brand">WongNaii<span>?</span></a>
+      <div style="display:flex; gap: .5rem">
+        <button class="glass-button is-icon" data-theme-toggle title="สลับธีม">☾</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero container">
+      <h1 class="hero-title">WongNaii<span class="qmark">?</span></h1>
+      <p class="hero-sub">หิวอะไรดี — ให้เราช่วยตัดสินใจ 🍜</p>
+
+      <div class="hero-actions">
+        <a class="glass-button is-primary" href="pages/all-restaurants.html">
+          🍽️ ดูรายการร้านอาหารทั้งหมด
+        </a>
+        <a class="glass-button" href="pages/randomizer.html">
+          🎲 สุ่มร้านตามคำถาม
+        </a>
+      </div>
+    </section>
+
+    <section class="marquee-section" aria-label="ร้านอาหารแนะนำ">
+      <div id="marquee" class="container" style="width:100%; max-width:none"></div>
+    </section>
+  </main>
+
+  <footer style="padding: 3rem 0; text-align:center; color: var(--text-muted); font-size:.9rem">
+    <p>WongNaii? · made with 🧡 in Bangkok</p>
+  </footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/theme.js"></script>
+  <script src="assets/js/maintenance.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/marquee.js"></script>
+</body>
+</html>

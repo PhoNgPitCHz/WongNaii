@@ -1,0 +1,151 @@
+/* ========================================================================
+   Home page — hero, marquee, primary actions
+   ======================================================================== */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: var(--space-3) 0;
+  background: linear-gradient(180deg, var(--bg-base) 40%, transparent);
+  -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(20px);
+}
+.site-header .container {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-4);
+}
+.brand {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--text-strong);
+  letter-spacing: -0.02em;
+}
+.brand span { color: var(--accent); }
+
+/* ---- Hero ---- */
+.hero {
+  text-align: center;
+  padding: clamp(3rem, 8vw, 6rem) 0 clamp(2rem, 5vw, 4rem);
+}
+.hero-title {
+  font-size: clamp(3.5rem, 12vw, 9rem);
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+  background: linear-gradient(135deg, var(--text-strong) 30%, var(--accent) 80%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  margin-bottom: var(--space-3);
+}
+.hero-title .qmark {
+  display: inline-block;
+  color: var(--accent);
+  -webkit-text-fill-color: var(--accent);
+  transform: translateY(-0.05em);
+  animation: wiggle 4s ease-in-out infinite;
+}
+@keyframes wiggle {
+  0%, 100% { transform: translateY(-0.05em) rotate(0deg); }
+  50% { transform: translateY(-0.1em) rotate(8deg); }
+}
+.hero-sub {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  color: var(--text-muted);
+  margin-bottom: var(--space-6);
+}
+
+.hero-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.hero-actions .glass-button { font-size: 1.05rem; padding: var(--space-4) var(--space-6); }
+
+/* ---- Marquee (3 rows) ---- */
+.marquee-section {
+  padding: var(--space-8) 0;
+  margin-top: var(--space-6);
+  overflow: hidden;
+}
+.marquee-row {
+  display: flex;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  padding: var(--space-2) 0;
+}
+.marquee-track {
+  display: flex;
+  gap: var(--space-4);
+  flex-shrink: 0;
+  padding-right: var(--space-4);
+  animation: marquee-scroll var(--marquee-duration, 60s) linear infinite;
+}
+.marquee-row[data-direction="right"] .marquee-track {
+  animation-direction: reverse;
+}
+.marquee-row:hover .marquee-track {
+  animation-play-state: paused;
+}
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Restaurant chip for the marquee */
+.marquee-chip {
+  flex: 0 0 auto;
+  width: 280px;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(20px) saturate(var(--blur-sat));
+          backdrop-filter: blur(20px) saturate(var(--blur-sat));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glass-shadow), var(--glass-inner-highlight);
+  transition: transform var(--transition-fast);
+}
+.marquee-chip:hover { transform: translateY(-3px); }
+.marquee-chip__emoji {
+  font-size: 1.6rem;
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  background: var(--accent-soft);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.marquee-chip__name {
+  font-weight: 600;
+  color: var(--text-strong);
+  font-size: 0.95rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.marquee-chip__meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ---- Maintenance banner ---- */
+.maintenance-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  display: grid; place-items: center;
+  background: var(--bg-base);
+  background-image: var(--bg-gradient);
+  padding: var(--space-6);
+  text-align: center;
+}
+.maintenance-screen .glass-card {
+  max-width: 480px;
+  padding: var(--space-8);
+}
+.maintenance-screen h1 { font-size: 2rem; margin-bottom: var(--space-3); }
+.maintenance-screen p { color: var(--text-muted); }

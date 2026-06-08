@@ -1,0 +1,178 @@
+/* ========================================================================
+   All-Restaurants page — filters, grid, card UI
+   ======================================================================== */
+
+.ar-header {
+  padding: clamp(2rem, 5vw, 4rem) 0 var(--space-5);
+  text-align: center;
+}
+.ar-header h1 {
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 800;
+  margin-bottom: var(--space-3);
+  background: linear-gradient(135deg, var(--text-strong), var(--accent));
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+.ar-header p { color: var(--text-muted); font-size: 1.05rem; }
+
+/* ---- Filter panel ---- */
+.ar-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-4);
+  padding: var(--space-5);
+  margin-bottom: var(--space-5);
+}
+.ar-filter-group { display: flex; flex-direction: column; gap: var(--space-2); }
+.ar-filter-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ar-filter-group select { appearance: none; cursor: pointer; }
+
+.ar-group-sizes {
+  display: flex; flex-wrap: wrap; gap: var(--space-2);
+}
+.ar-group-sizes button {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all var(--transition-fast);
+}
+.ar-group-sizes button.is-active {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+
+/* ---- Top bar (count + sort + add) ---- */
+.ar-top-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}
+.ar-result-count { color: var(--text-muted); font-size: 0.95rem; }
+.ar-result-count strong { color: var(--text-strong); }
+.ar-top-actions { display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; }
+.ar-top-actions select { min-width: 160px; }
+
+/* ---- Card grid (3 cols × 4 rows = 12) ---- */
+.ar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+@media (min-width: 1024px) {
+  .ar-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ---- Restaurant card ---- */
+.r-card {
+  display: flex; flex-direction: column;
+  padding: var(--space-5);
+  gap: var(--space-3);
+  position: relative;
+  min-height: 380px;
+}
+.r-card__top {
+  display: flex; justify-content: space-between; gap: var(--space-3);
+  align-items: flex-start;
+}
+.r-card__title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-strong);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+.r-card__type { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+
+.r-heart {
+  flex-shrink: 0;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  font-size: 1.1rem;
+  transition: all var(--transition-fast);
+}
+.r-heart:hover { transform: scale(1.1); }
+.r-heart.is-liked { background: var(--heart); border-color: var(--heart); color: white; }
+
+.r-card__meta {
+  display: flex; flex-wrap: wrap; gap: var(--space-2);
+  font-size: 0.85rem;
+}
+.r-card__meta .glass-pill { font-size: 0.78rem; }
+
+.r-card__info { font-size: 0.88rem; color: var(--text); display: flex; flex-direction: column; gap: 4px; }
+.r-card__info .row { display: flex; gap: var(--space-2); align-items: flex-start; }
+.r-card__info .row span:first-child { width: 18px; flex-shrink: 0; opacity: 0.7; }
+
+.r-card__actions {
+  display: flex; gap: var(--space-2);
+  margin-top: auto; padding-top: var(--space-3);
+  flex-wrap: wrap;
+}
+.r-card__actions .glass-button { flex: 1 1 auto; font-size: 0.85rem; padding: 10px 14px; }
+
+.r-card__party-badge {
+  position: absolute; top: 12px; left: 12px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px var(--accent-soft);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.05); }
+}
+
+/* ---- Pagination ---- */
+.ar-pagination {
+  display: flex; justify-content: center; align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-6) 0 var(--space-8);
+}
+.ar-pagination .page-info { color: var(--text-muted); font-size: 0.95rem; }
+.ar-pagination .glass-button:disabled { opacity: 0.4; pointer-events: none; }
+
+/* ---- Empty / loading ---- */
+.ar-empty, .ar-loading {
+  text-align: center; padding: var(--space-8); color: var(--text-muted);
+}
+.ar-loading { animation: pulse 1.4s ease-in-out infinite; }
+
+/* ---- Add Restaurant modal form ---- */
+.add-form { display: flex; flex-direction: column; gap: var(--space-4); }
+.add-form label { font-size: 0.9rem; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px; }
+.add-form textarea { min-height: 80px; resize: vertical; font-family: inherit; }
+.add-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+@media (max-width: 540px) { .add-form .form-row { grid-template-columns: 1fr; } }
+
+.add-form-status {
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  display: none;
+}
+.add-form-status.is-info    { display: block; background: var(--accent-soft); color: var(--text-strong); }
+.add-form-status.is-error   { display: block; background: rgba(255, 60, 60, 0.15); color: #d33; }
+.add-form-status.is-success { display: block; background: rgba(60, 200, 100, 0.15); color: #1a8040; }
