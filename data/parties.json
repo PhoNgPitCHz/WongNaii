@@ -17,6 +17,11 @@
         "name": "Pond",
         "joinedAt": 1780926872528,
         "host": true
+      },
+      {
+        "id": "5fa21d10-ff41-4da2-b949-993afecb28c1",
+        "name": "Pond V2",
+        "joinedAt": 1780926963585
       }
     ]
   }
