@@ -47,5 +47,26 @@
       }
     ],
     "closedAt": 1780927240466
+  },
+  {
+    "id": "445cf890-0bd1-4951-a078-d03ea98a1f3f",
+    "restaurantId": "Tsuru Udon Phrom Phong 39",
+    "partyName": "1",
+    "hostName": "1",
+    "hostId": "f144a1d6-b9d5-4caa-b15d-0f9c1a572254",
+    "eatTime": "1",
+    "requiredPeople": 4,
+    "details": "1",
+    "createdAt": 1780927445595,
+    "expiresAt": 1780928345595,
+    "status": "recruiting",
+    "members": [
+      {
+        "id": "f144a1d6-b9d5-4caa-b15d-0f9c1a572254",
+        "name": "1",
+        "joinedAt": 1780927445595,
+        "host": true
+      }
+    ]
   }
 ]
