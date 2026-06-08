@@ -134,5 +134,26 @@
       }
     ],
     "closedAt": 1780928621880
+  },
+  {
+    "id": "e54b3366-1a7b-4733-af22-d61377328ee8",
+    "restaurantId": "Kasa Ari",
+    "partyName": "มา ๆ",
+    "hostName": "Pond",
+    "hostId": "98823b10-89b5-4047-a0cd-152736a71019",
+    "eatTime": "20:00",
+    "requiredPeople": 4,
+    "details": "เหด",
+    "createdAt": 1780930667167,
+    "expiresAt": 1780931567167,
+    "status": "recruiting",
+    "members": [
+      {
+        "id": "98823b10-89b5-4047-a0cd-152736a71019",
+        "name": "Pond",
+        "joinedAt": 1780930667167,
+        "host": true
+      }
+    ]
   }
 ]
