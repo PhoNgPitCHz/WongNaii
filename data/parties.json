@@ -68,5 +68,26 @@
         "host": true
       }
     ]
+  },
+  {
+    "id": "6638eaa1-7395-4f11-bbc8-9e1664557cea",
+    "restaurantId": "Supanniga Eating Room by Khun Yai",
+    "partyName": "มา ๆ",
+    "hostName": "Pond",
+    "hostId": "98823b10-89b5-4047-a0cd-152736a71019",
+    "eatTime": "20:00",
+    "requiredPeople": 4,
+    "details": "หกด",
+    "createdAt": 1780927545257,
+    "expiresAt": 1780928445257,
+    "status": "recruiting",
+    "members": [
+      {
+        "id": "98823b10-89b5-4047-a0cd-152736a71019",
+        "name": "Pond",
+        "joinedAt": 1780927545257,
+        "host": true
+      }
+    ]
   }
 ]
