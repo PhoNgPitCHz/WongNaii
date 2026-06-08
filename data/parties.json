@@ -25,5 +25,26 @@
       }
     ],
     "closedAt": 1780927045519
+  },
+  {
+    "id": "fe22a3f6-cfb1-4bfb-b7e7-a193bdee1597",
+    "restaurantId": "Kenshin Izakaya Asok",
+    "partyName": "1",
+    "hostName": "1",
+    "hostId": "f144a1d6-b9d5-4caa-b15d-0f9c1a572254",
+    "eatTime": "1",
+    "requiredPeople": 9,
+    "details": "112",
+    "createdAt": 1780927201569,
+    "expiresAt": 1780928101569,
+    "status": "recruiting",
+    "members": [
+      {
+        "id": "f144a1d6-b9d5-4caa-b15d-0f9c1a572254",
+        "name": "1",
+        "joinedAt": 1780927201569,
+        "host": true
+      }
+    ]
   }
 ]
