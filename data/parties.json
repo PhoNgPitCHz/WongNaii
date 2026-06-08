@@ -215,5 +215,26 @@
       }
     ],
     "closedAt": 1780931183406
+  },
+  {
+    "id": "5a977ec2-40f9-47bd-b77c-a7b02fc05a99",
+    "restaurantId": "NANA Coffee Roasters Ari",
+    "partyName": "มา ๆ",
+    "hostName": "Pond",
+    "hostId": "98823b10-89b5-4047-a0cd-152736a71019",
+    "eatTime": "20:00",
+    "requiredPeople": 4,
+    "details": "fsd",
+    "createdAt": 1780931341482,
+    "expiresAt": 1780932241482,
+    "status": "recruiting",
+    "members": [
+      {
+        "id": "98823b10-89b5-4047-a0cd-152736a71019",
+        "name": "Pond",
+        "joinedAt": 1780931341482,
+        "host": true
+      }
+    ]
   }
 ]
