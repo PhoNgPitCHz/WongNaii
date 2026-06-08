@@ -227,7 +227,7 @@
     "details": "fsd",
     "createdAt": 1780931341482,
     "expiresAt": 1780932241482,
-    "status": "recruiting",
+    "status": "closed",
     "members": [
       {
         "id": "98823b10-89b5-4047-a0cd-152736a71019",
@@ -240,6 +240,7 @@
         "name": "PondNaii",
         "joinedAt": 1780931364101
       }
-    ]
+    ],
+    "closedAt": 1780931822870
   }
 ]
