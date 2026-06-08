@@ -146,7 +146,7 @@
     "details": "เหด",
     "createdAt": 1780930667167,
     "expiresAt": 1780931567167,
-    "status": "recruiting",
+    "status": "closed",
     "members": [
       {
         "id": "98823b10-89b5-4047-a0cd-152736a71019",
@@ -159,6 +159,7 @@
         "name": "Nui",
         "joinedAt": 1780930678452
       }
-    ]
+    ],
+    "closedAt": 1780930962190
   }
 ]
