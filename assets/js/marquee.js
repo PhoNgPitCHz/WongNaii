@@ -71,9 +71,7 @@
     return row;
   }
 
-  // Slowed 50% — production CDN delivers fewer paint stalls than dev preview,
-  // so the same duration values feel ~2× faster on the deployed site.
-  container.appendChild(buildRow("left",  140));
-  container.appendChild(buildRow("right", 180));
-  container.appendChild(buildRow("left",  160));
+  container.appendChild(buildRow("left",  231));
+  container.appendChild(buildRow("right", 297));
+  container.appendChild(buildRow("left",  264));
 })();
