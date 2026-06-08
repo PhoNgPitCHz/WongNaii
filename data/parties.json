@@ -80,7 +80,7 @@
     "details": "หกด",
     "createdAt": 1780927545257,
     "expiresAt": 1780928445257,
-    "status": "recruiting",
+    "status": "closed",
     "members": [
       {
         "id": "98823b10-89b5-4047-a0cd-152736a71019",
@@ -88,6 +88,7 @@
         "joinedAt": 1780927545257,
         "host": true
       }
-    ]
+    ],
+    "closedAt": 1780928063784
   }
 ]
