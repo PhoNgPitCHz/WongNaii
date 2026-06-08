@@ -129,6 +129,10 @@ function submitRestaurant(p) {
 function geminiAutoFill(p) {
   const apiKey = PROPS.getProperty("GEMINI_API_KEY");
   if (!apiKey) throw new Error("GEMINI_API_KEY not set in Script Properties");
+  // Allow swapping models without code change. Try in order; fall back on 429.
+  const modelList = (PROPS.getProperty("GEMINI_MODELS") ||
+    "gemini-3.5-flash,gemini-3-flash,gemini-flash-latest,gemini-2.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash"
+  ).split(",").map((s) => s.trim()).filter(Boolean);
 
   const prompt = [
     "คุณคือผู้ช่วยรวบรวมข้อมูลร้านอาหารในไทย ผู้ใช้เพิ่งส่งข้อมูลร้านใหม่เข้ามา",
@@ -152,20 +156,34 @@ function geminiAutoFill(p) {
     '"Opening Hours", "Suitable for Group", "Source URL (Google Map)", "Notes"',
   ].join("\n");
 
-  const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey;
-  const res = UrlFetchApp.fetch(url, {
-    method: "post",
-    contentType: "application/json",
-    muteHttpExceptions: true,
-    payload: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { responseMimeType: "application/json", temperature: 0.4 },
-    }),
-  });
-
-  if (res.getResponseCode() >= 300) throw new Error("Gemini API error: " + res.getContentText());
-  const data = JSON.parse(res.getContentText());
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+  // Try each model in turn. 429 → next model. Other errors → throw.
+  let lastErr = "";
+  let text = null;
+  for (const model of modelList) {
+    const url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + apiKey;
+    const res = UrlFetchApp.fetch(url, {
+      method: "post",
+      contentType: "application/json",
+      muteHttpExceptions: true,
+      payload: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: "application/json", temperature: 0.4 },
+      }),
+    });
+    const code = res.getResponseCode();
+    if (code === 200) {
+      const data = JSON.parse(res.getContentText());
+      text = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+      break;
+    }
+    lastErr = "model=" + model + " status=" + code + " body=" + res.getContentText();
+    // 429 quota / 404 model-not-available → try next model. Other codes → fail fast.
+    if (code !== 429 && code !== 404) throw new Error("Gemini API error: " + lastErr);
+  }
+  if (text === null) {
+    throw new Error("All Gemini models quota-exceeded. Last: " + lastErr +
+      "\n\nวิธีแก้:\n1) ไป https://aistudio.google.com/apikey สร้าง API key ใหม่จากโปรเจกต์ที่มี free tier\n2) หรือเปิด billing ใน Google AI Studio\n3) หรือเพิ่ม Script Property GEMINI_MODELS=<model1>,<model2> เพื่อระบุ model ที่ใช้ได้");
+  }
   let parsed;
   try { parsed = JSON.parse(text); } catch (e) {
     // Strip ```json fences if any

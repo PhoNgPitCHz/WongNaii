@@ -1,14 +1,16 @@
 /**
  * Party System — Creator (host) + Seeker (joiner) + Chat (polling).
  * All state lives in data/parties.json + data/chats/<id>.json via Apps Script.
+ *
+ * Dashboard model: chat is ALWAYS visible to everyone in the party — there's
+ * no host-only "Start Chat" gate. Either side can minimize the modal into a
+ * floating bubble and keep browsing while polling continues in the background.
  */
 (function () {
-  // Inject the party.css link (page authors don't need to remember it)
   if (!document.querySelector('link[data-party-css]')) {
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.dataset.partyCss = "1";
-    // resolve relative to current page
     const here = location.pathname.replace(/\/[^/]*$/, "/");
     link.href = here + (here.endsWith("/pages/") ? "../" : "") + "assets/css/party.css";
     document.head.appendChild(link);
@@ -18,6 +20,11 @@
     const d = document.createElement("div"); d.id = "party-modals"; document.body.appendChild(d); return d;
   })();
 
+  // ---------- Active session registry --------------------------------
+  // One open dashboard at a time. Tracks polling handles + unread count
+  // so we can minimize/restore without losing state.
+  let session = null;
+
   function modalShell(id, innerHTML) {
     return `
       <div class="glass-modal-scrim is-open" id="${id}" role="dialog" aria-modal="true">
@@ -25,7 +32,7 @@
       </div>`;
   }
 
-  function close(id) {
+  function dismiss(id) {
     const el = document.getElementById(id);
     if (el) { el.classList.remove("is-open"); setTimeout(() => el.remove(), 400); }
   }
@@ -77,7 +84,7 @@
     container.insertAdjacentHTML("beforeend", modalShell("party-creator", html));
     const scrim = document.getElementById("party-creator");
     scrim.addEventListener("click", (e) => {
-      if (e.target === scrim || e.target.closest("[data-close]")) close("party-creator");
+      if (e.target === scrim || e.target.closest("[data-close]")) dismiss("party-creator");
     });
     document.getElementById("party-create-form").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -94,7 +101,7 @@
           requiredPeople: parseInt(document.getElementById("pf-people").value, 10),
           details: document.getElementById("pf-details").value.trim(),
         });
-        close("party-creator");
+        dismiss("party-creator");
         openDashboard(restaurant, party);
       } catch (err) {
         console.error(err);
@@ -105,18 +112,45 @@
   }
 
   // ====================================================================
-  // DASHBOARD — host sees joiners + can start chat / close party
+  // DASHBOARD — shown to host AND members. Chat is always present.
+  // Polls members + messages every 3s. Minimize collapses to a bubble.
   // ====================================================================
   function openDashboard(restaurant, party) {
+    // Tear down any prior session
+    if (session) { teardownSession(); }
+
     const isHost = party.hostId === WongnaiiIdentity.getId();
+    session = {
+      party, restaurant, isHost,
+      lastMsgTs: 0,
+      unread: 0,
+      open: true,
+      poll: null,
+      chatPoll: null,
+    };
+
+    renderDashboard();
+    session.poll = setInterval(refreshParty, 4000);
+    session.chatPoll = setInterval(refreshMessages, 3000);
+    refreshMessages();  // first paint
+  }
+
+  function renderDashboard() {
+    const { party, restaurant, isHost } = session;
     const html = `
-      <h2 style="margin-bottom: .25rem">${esc(party.partyName)}</h2>
-      <p style="color: var(--text-muted); margin-bottom: 1rem">ที่ <strong>${esc(restaurant.name)}</strong> · ${esc(party.eatTime)}</p>
+      <div class="party-header">
+        <div>
+          <h2>${esc(party.partyName)}</h2>
+          <p style="color: var(--text-muted); margin: 4px 0 0">ที่ <strong>${esc(restaurant.name)}</strong> · ${esc(party.eatTime)}</p>
+        </div>
+        <button class="party-min-btn" id="party-minimize" title="ย่อหน้าต่าง — ดูร้านอื่นต่อ">—</button>
+      </div>
+
       <div class="countdown" id="party-countdown">
         <div style="font-size: 1.6rem">⏱️</div>
         <div>
           <div class="countdown__time" id="party-countdown-time">15:00</div>
-          <div class="countdown__label">เวลารับสมัคร (Recruitment)</div>
+          <div class="countdown__label">เวลารับสมัคร</div>
         </div>
       </div>
 
@@ -128,48 +162,61 @@
         </table>
       </div>
 
-      <div id="party-actions" style="display:flex; gap:.75rem; justify-content:flex-end; margin-top:1.25rem">
-        ${isHost ? `
-          <button class="glass-button" data-close>ปิดหน้าต่าง</button>
-          <button class="glass-button is-primary" id="btn-start-chat">เริ่มคุย (Start Chat)</button>
-        ` : `<button class="glass-button" data-close>ออก</button>`}
+      <h3 style="margin-top: 1.25rem; font-size: 1rem">💬 แชท</h3>
+      <div class="chat-box">
+        <div class="chat-messages" id="chat-msgs"></div>
+        <form class="chat-form" id="chat-form">
+          <input id="chat-input" class="glass-input" placeholder="พิมพ์ข้อความ..." autocomplete="off" required>
+          <button class="glass-button is-primary">ส่ง</button>
+        </form>
       </div>
 
-      <div id="chat-section" style="display:none"></div>`;
+      <div style="display:flex; gap:.75rem; justify-content:flex-end; margin-top:1.25rem">
+        ${isHost
+          ? `<button class="glass-button" id="btn-close-party">ปิด Party</button>`
+          : `<button class="glass-button" data-leave>ออกจาก Party</button>`}
+      </div>`;
 
+    // Remove existing scrim if any (re-render path)
+    const existing = document.getElementById("party-dashboard");
+    if (existing) existing.remove();
     container.insertAdjacentHTML("beforeend", modalShell("party-dashboard", html));
+
     const scrim = document.getElementById("party-dashboard");
     scrim.addEventListener("click", (e) => {
-      if (e.target === scrim || e.target.closest("[data-close]")) {
-        stopPoll(); close("party-dashboard");
-      }
+      if (e.target === scrim) return;  // backdrop click does NOT close — must minimize
+      if (e.target.closest("[data-leave]")) { teardownSession(); return; }
     });
 
+    document.getElementById("party-minimize").addEventListener("click", minimize);
     renderMembers(party);
     startCountdown(party);
-    let pollHandle;
-    function startPoll() {
-      pollHandle = setInterval(async () => {
-        try {
-          const list = await WongnaiiAPI.listParties(restaurant.id);
-          const fresh = list.find((p) => p.id === party.id);
-          if (fresh) { party = fresh; renderMembers(party); }
-        } catch (e) { /* keep trying */ }
-      }, 4000);
-    }
-    function stopPoll() { if (pollHandle) clearInterval(pollHandle); }
-    startPoll();
+    repaintMessages();  // existing messages persist via session.cachedMessages
 
-    const startBtn = document.getElementById("btn-start-chat");
-    if (startBtn) startBtn.addEventListener("click", async () => {
-      startBtn.disabled = true; startBtn.textContent = "...";
+    // Chat form
+    document.getElementById("chat-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = document.getElementById("chat-input");
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
       try {
-        // mark party as chatting (we reuse joinParty semantics — Apps Script doesn't need a separate action for now)
-        // For simplicity, just open chat UI; party stays "recruiting" until host closes.
-        openChat(party);
-      } finally {
-        startBtn.disabled = false; startBtn.textContent = "เริ่มคุย (Start Chat)";
-      }
+        await WongnaiiAPI.postMessage(party.id, {
+          id: WongnaiiIdentity.getId(),
+          name: WongnaiiIdentity.getName() || "ผู้ใช้",
+        }, text);
+        refreshMessages();
+      } catch (err) { alert("ส่งไม่สำเร็จ: " + err.message); }
+    });
+
+    // Host: close party
+    const closeBtn = document.getElementById("btn-close-party");
+    if (closeBtn) closeBtn.addEventListener("click", async () => {
+      if (!confirm("ปิด Party นี้? สมาชิกจะออกจากแชท")) return;
+      try {
+        await WongnaiiAPI.closeParty(party.id);
+        teardownSession();
+      } catch (err) { alert("ปิดไม่สำเร็จ: " + err.message); }
     });
   }
 
@@ -188,6 +235,7 @@
   function startCountdown(party) {
     const timeEl = document.getElementById("party-countdown-time");
     const card = document.getElementById("party-countdown");
+    if (!timeEl || !card) return;
     function tick() {
       const ms = party.expiresAt - Date.now();
       if (ms <= 0) {
@@ -202,37 +250,56 @@
     }
     tick();
     const handle = setInterval(tick, 1000);
+    session.countdownHandle = handle;
   }
 
-  // ====================================================================
-  // CHAT — replaces dashboard footer with chat box, polls every 3s
-  // ====================================================================
-  function openChat(party) {
-    const section = document.getElementById("chat-section");
-    document.getElementById("party-actions").style.display = "none";
-    section.style.display = "block";
-    section.innerHTML = `
-      <h3 style="margin-top: 1.25rem; font-size: 1rem">💬 แชท</h3>
-      <div class="chat-box">
-        <div class="chat-messages" id="chat-msgs"></div>
-        <form class="chat-form" id="chat-form">
-          <input id="chat-input" class="glass-input" placeholder="พิมพ์ข้อความ..." autocomplete="off" required>
-          <button class="glass-button is-primary">ส่ง</button>
-        </form>
-      </div>
-      <div style="display:flex; gap:.75rem; justify-content:flex-end; margin-top:1rem">
-        ${party.hostId === WongnaiiIdentity.getId()
-          ? `<button class="glass-button" id="btn-close-party">ปิด Party</button>`
-          : `<button class="glass-button" data-close>ออก</button>`}
-      </div>`;
+  // ---- Polling --------------------------------------------------------
+  async function refreshParty() {
+    if (!session) return;
+    try {
+      const list = await WongnaiiAPI.listParties(session.restaurant.id);
+      const fresh = list.find((p) => p.id === session.party.id);
+      if (!fresh) {
+        // Party was closed remotely (host closed it on another tab)
+        teardownSession();
+        return;
+      }
+      session.party = fresh;
+      if (session.open) renderMembers(fresh);
+    } catch (e) { /* keep trying */ }
+  }
 
+  async function refreshMessages() {
+    if (!session) return;
+    try {
+      const msgs = await WongnaiiAPI.getMessages(session.party.id, session.lastMsgTs);
+      if (!msgs.length) return;
+      session.cachedMessages = (session.cachedMessages || []).concat(msgs);
+      msgs.forEach((m) => { session.lastMsgTs = Math.max(session.lastMsgTs, m.ts); });
+      if (session.open) {
+        appendMessages(msgs);
+      } else {
+        // Count unread (excluding own)
+        const myId = WongnaiiIdentity.getId();
+        session.unread += msgs.filter((m) => m.user?.id !== myId).length;
+        updateBubble();
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  function repaintMessages() {
+    const msgs = session.cachedMessages || [];
     const msgsEl = document.getElementById("chat-msgs");
-    const form = document.getElementById("chat-form");
-    const input = document.getElementById("chat-input");
-    let lastTs = 0;
-    const myId = WongnaiiIdentity.getId();
+    if (!msgsEl) return;
+    msgsEl.innerHTML = "";
+    appendMessages(msgs);
+  }
 
-    function renderBubble(m) {
+  function appendMessages(msgs) {
+    const msgsEl = document.getElementById("chat-msgs");
+    if (!msgsEl) return;
+    const myId = WongnaiiIdentity.getId();
+    msgs.forEach((m) => {
       const isMe = m.user?.id === myId;
       const div = document.createElement("div");
       div.className = "chat-bubble" + (isMe ? " is-me" : "");
@@ -240,45 +307,69 @@
         ${!isMe ? `<div class="chat-bubble__author">${esc(m.user?.name || "?")}</div>` : ""}
         <div class="chat-bubble__text">${esc(m.message)}</div>`;
       msgsEl.appendChild(div);
-      msgsEl.scrollTop = msgsEl.scrollHeight;
+    });
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+
+  // ---- Minimize / Restore --------------------------------------------
+  function minimize() {
+    if (!session) return;
+    session.open = false;
+    dismiss("party-dashboard");
+    showBubble();
+  }
+
+  function restore() {
+    if (!session) return;
+    session.open = true;
+    session.unread = 0;
+    const bubble = document.getElementById("party-bubble");
+    if (bubble) bubble.remove();
+    renderDashboard();
+    repaintMessages();
+  }
+
+  function showBubble() {
+    const existing = document.getElementById("party-bubble");
+    if (existing) existing.remove();
+    const partyName = esc(session.party.partyName);
+    const html = `
+      <button class="party-bubble" id="party-bubble" title="กลับเข้า Party">
+        <div class="party-bubble__icon">💬</div>
+        <div class="party-bubble__label">
+          <strong>${partyName}</strong>
+          <small>คลิกเพื่อเปิด</small>
+        </div>
+        ${session.unread ? `<div class="party-bubble__badge" id="bubble-badge">${session.unread > 99 ? "99+" : session.unread}</div>` : ""}
+      </button>`;
+    document.body.insertAdjacentHTML("beforeend", html);
+    document.getElementById("party-bubble").addEventListener("click", restore);
+  }
+
+  function updateBubble() {
+    let badge = document.getElementById("bubble-badge");
+    const bubble = document.getElementById("party-bubble");
+    if (!bubble) return;
+    if (session.unread > 0) {
+      if (!badge) {
+        bubble.insertAdjacentHTML("beforeend", `<div class="party-bubble__badge" id="bubble-badge">${session.unread > 99 ? "99+" : session.unread}</div>`);
+      } else {
+        badge.textContent = session.unread > 99 ? "99+" : session.unread;
+      }
+    } else if (badge) {
+      badge.remove();
     }
+  }
 
-    async function poll() {
-      try {
-        const msgs = await WongnaiiAPI.getMessages(party.id, lastTs);
-        msgs.forEach((m) => { renderBubble(m); lastTs = Math.max(lastTs, m.ts); });
-      } catch (e) { /* ignore */ }
-    }
-    poll();
-    const handle = setInterval(poll, 3000);
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const text = input.value.trim();
-      if (!text) return;
-      input.value = "";
-      try {
-        await WongnaiiAPI.postMessage(party.id, { id: myId, name: WongnaiiIdentity.getName() || "ผู้ใช้" }, text);
-        poll();
-      } catch (err) { alert("ส่งไม่สำเร็จ: " + err.message); }
-    });
-
-    const closeBtn = document.getElementById("btn-close-party");
-    if (closeBtn) closeBtn.addEventListener("click", async () => {
-      if (!confirm("ปิด Party นี้? สมาชิกจะออกจากแชท")) return;
-      try {
-        await WongnaiiAPI.closeParty(party.id);
-        clearInterval(handle);
-        close("party-dashboard");
-      } catch (err) { alert("ปิดไม่สำเร็จ: " + err.message); }
-    });
-
-    // Stop polling when modal is closed
-    const scrim = document.getElementById("party-dashboard");
-    const observer = new MutationObserver(() => {
-      if (!document.body.contains(scrim)) { clearInterval(handle); observer.disconnect(); }
-    });
-    observer.observe(document.body, { childList: true });
+  function teardownSession() {
+    if (!session) return;
+    if (session.poll) clearInterval(session.poll);
+    if (session.chatPoll) clearInterval(session.chatPoll);
+    if (session.countdownHandle) clearInterval(session.countdownHandle);
+    const bubble = document.getElementById("party-bubble");
+    if (bubble) bubble.remove();
+    dismiss("party-dashboard");
+    session = null;
   }
 
   // ====================================================================
@@ -301,17 +392,16 @@
     container.insertAdjacentHTML("beforeend", modalShell("party-seeker", html));
     const scrim = document.getElementById("party-seeker");
     scrim.addEventListener("click", async (e) => {
-      if (e.target === scrim || e.target.closest("[data-close]")) close("party-seeker");
+      if (e.target === scrim || e.target.closest("[data-close]")) dismiss("party-seeker");
       const joinBtn = e.target.closest("[data-join]");
       if (joinBtn) {
         const partyId = joinBtn.dataset.join;
-        const party = parties.find((p) => p.id === partyId);
         const name = WongnaiiIdentity.getOrPromptName("ใส่ชื่อของคุณเพื่อเข้า Party");
         if (!name) return;
         joinBtn.disabled = true; joinBtn.textContent = "กำลังเข้า...";
         try {
           const updated = await WongnaiiAPI.joinParty(partyId, { id: WongnaiiIdentity.getId(), name });
-          close("party-seeker");
+          dismiss("party-seeker");
           openDashboard(restaurant, updated);
         } catch (err) {
           alert("เข้าไม่สำเร็จ: " + err.message);

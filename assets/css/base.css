@@ -68,8 +68,8 @@
                  linear-gradient(180deg, #0a0612, #1a0f2e);
 
   --text-strong: #fff5ee;
-  --text:        #e8dad0;
-  --text-muted:  #a89a8e;
+  --text:        #f0e3d8;
+  --text-muted:  #c0b0a0;
 
   --glass-bg:     rgba(255, 255, 255, 0.06);
   --glass-bg-hi:  rgba(255, 255, 255, 0.1);
@@ -99,8 +99,8 @@
                    radial-gradient(1000px 900px at 50% 110%, #0a1f3a 0%, transparent 60%),
                    linear-gradient(180deg, #0a0612, #1a0f2e);
     --text-strong: #fff5ee;
-    --text:        #e8dad0;
-    --text-muted:  #a89a8e;
+    --text:        #f0e3d8;
+    --text-muted:  #c0b0a0;
     --glass-bg:     rgba(255, 255, 255, 0.06);
     --glass-bg-hi:  rgba(255, 255, 255, 0.1);
     --glass-border: rgba(255, 255, 255, 0.12);
