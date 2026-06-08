@@ -6,7 +6,7 @@
  */
 window.WONGNAII_CONFIG = Object.freeze({
   // Replace this with your deployed Apps Script web app URL (ends with /exec)
-  APPS_SCRIPT_URL: "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE",
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyfdIMQ54D4b4TxnvTPhrv90iNmd9B-Vz_vA4Oj9SrC4r-Ai1lOJbrER23IFY2kM-iTAg/exec",
 
   // Public CSV fallback — used only as a read-only fallback if Apps Script is unreachable.
   // The browser fetches restaurants from Apps Script first (which proxies the Sheet).
