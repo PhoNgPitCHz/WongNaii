@@ -123,7 +123,7 @@
     "details": "กฟหด",
     "createdAt": 1780928609936,
     "expiresAt": 1780929509936,
-    "status": "recruiting",
+    "status": "closed",
     "members": [
       {
         "id": "98823b10-89b5-4047-a0cd-152736a71019",
@@ -131,6 +131,7 @@
         "joinedAt": 1780928609936,
         "host": true
       }
-    ]
+    ],
+    "closedAt": 1780928621880
   }
 ]
