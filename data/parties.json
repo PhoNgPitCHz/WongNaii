@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "id": "5a36a5bf-410e-44a5-8283-da6c542e436a",
+    "restaurantId": "mogura ari",
+    "partyName": "มา ๆ",
+    "hostName": "Pond",
+    "hostId": "98823b10-89b5-4047-a0cd-152736a71019",
+    "eatTime": "20:00",
+    "requiredPeople": 4,
+    "details": "อยากเจอออ",
+    "createdAt": 1780926872528,
+    "expiresAt": 1780927772528,
+    "status": "recruiting",
+    "members": [
+      {
+        "id": "98823b10-89b5-4047-a0cd-152736a71019",
+        "name": "Pond",
+        "joinedAt": 1780926872528,
+        "host": true
+      }
+    ]
+  }
+]
