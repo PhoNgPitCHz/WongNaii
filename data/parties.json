@@ -173,7 +173,7 @@
     "details": "sdf",
     "createdAt": 1780931016012,
     "expiresAt": 1780931916012,
-    "status": "recruiting",
+    "status": "closed",
     "members": [
       {
         "id": "5fa21d10-ff41-4da2-b949-993afecb28c1",
@@ -186,6 +186,7 @@
         "name": "Pond",
         "joinedAt": 1780931045057
       }
-    ]
+    ],
+    "closedAt": 1780931090275
   }
 ]
