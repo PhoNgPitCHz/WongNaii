@@ -97,12 +97,23 @@
         <div class="form-row">
           <div>
             <label for="f-submitter">ชื่อคนส่ง</label>
-            <input id="f-submitter" class="glass-input" required>
+            <input id="f-submitter" class="glass-input">
           </div>
           <div>
             <label for="f-restaurant">ชื่อร้าน *</label>
             <input id="f-restaurant" class="glass-input" required>
           </div>
+        </div>
+        <div>
+          <label for="f-zone">ย่าน / โซน *</label>
+          <select id="f-zone" class="glass-input" required>
+            <option value="">— เลือกย่าน —</option>
+            <option value="อโศก">อโศก</option>
+            <option value="สยาม">สยาม</option>
+            <option value="อารีย์">อารีย์</option>
+            <option value="ทองหล่อ">ทองหล่อ</option>
+            <option value="พร้อมพงษ์">พร้อมพงษ์</option>
+          </select>
         </div>
         <div>
           <label for="f-review">รีวิว / ทำไมต้องกินร้านนี้ *</label>
@@ -118,10 +129,9 @@
             <input id="f-menu-desc" class="glass-input">
           </div>
         </div>
-        <div class="add-form-status" id="add-status"></div>
         <div style="display:flex; gap: .75rem; justify-content: flex-end; margin-top: .5rem">
           <button type="button" class="glass-button" data-modal-close>ยกเลิก</button>
-          <button type="submit" class="glass-button is-primary" id="add-submit">บันทึก (AI auto-fill)</button>
+          <button type="submit" class="glass-button is-primary">ส่งข้อมูล</button>
         </div>
       </form>
     </div>
@@ -129,6 +139,9 @@
 
   <!-- Party modals get injected by party.js -->
   <div id="party-modals"></div>
+
+  <!-- Toast notifications -->
+  <div id="toast-container" class="toast-container"></div>
 
   <script src="../assets/js/config.js"></script>
   <script src="../assets/js/theme.js"></script>

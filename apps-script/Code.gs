@@ -135,18 +135,26 @@ function geminiAutoFill(p) {
   ).split(",").map((s) => s.trim()).filter(Boolean);
 
   const prompt = [
-    "คุณคือผู้ช่วยรวบรวมข้อมูลร้านอาหารในไทย ผู้ใช้เพิ่งส่งข้อมูลร้านใหม่เข้ามา",
-    "ช่วยเติมข้อมูลคอลัมน์ที่ยังขาดให้สมจริงที่สุด ถ้าไม่ทราบให้ใช้คำว่า 'ไม่ระบุ'",
+    "คุณคือผู้ช่วยตรวจสอบและรวบรวมข้อมูลร้านอาหารในกรุงเทพฯ",
+    "",
+    "STEP 1 — ตรวจสอบว่าร้านมีอยู่จริง:",
+    `ร้านชื่อ \"${p.restaurantName}\" ในย่าน${p.area || "ที่ระบุ"} ของกรุงเทพฯ มีอยู่จริงหรือไม่?`,
+    "- ถ้าเป็นชื่อร้านที่คุณรู้จักหรือน่าจะมีอยู่จริงในย่านนั้น → verified: \"yes\"",
+    "- ถ้าชื่อดูสุ่ม/มั่ว/ไม่น่าจะเป็นร้านจริง/ไม่รู้จักเลย → verified: \"no\"",
+    "",
+    "STEP 2 — ถ้า verified: \"yes\" เท่านั้น ให้เติมข้อมูลที่เหลือให้สมจริง ถ้าไม่ทราบให้ใช้คำว่า 'ไม่ระบุ'",
     "ตอบกลับเป็น JSON ตรงตาม keys ที่กำหนดเท่านั้น ห้ามมีข้อความอื่น",
     "",
     "ข้อมูลที่ผู้ใช้ให้มา:",
     `- Restaurant Name: ${p.restaurantName}`,
+    `- ย่าน/โซน: ${p.area || "ไม่ระบุ"}`,
     `- ทำไมต้องกินร้านนี้ (รีวิว): ${p.review || ""}`,
     `- Recommend Menu 1: ${p.recommendMenu || ""}`,
     `- คำอธิบาย Recommend Menu 1: ${p.recommendMenuDesc || ""}`,
     `- ผู้ส่ง: ${p.submitterName || ""}`,
     "",
     "ให้ส่ง JSON ที่มี keys ดังนี้ (ใช้ string ทุกตัว):",
+    '"verified",',
     '"Restaurant Name", "Area", "Food Type", "ทำไมต้องกินร้านนี้",',
     '"Recommend Menu 1", "คำอธิบาย Recommend Menu 1",',
     '"Recommend Menu 2", "คำอธิบาย Recommend Menu 2",',
@@ -190,8 +198,18 @@ function geminiAutoFill(p) {
     parsed = JSON.parse(text.replace(/^```json\s*|\s*```$/g, ""));
   }
 
+  // Reject if Gemini says the restaurant doesn't exist
+  if ((parsed.verified || "").toLowerCase() === "no") {
+    throw new Error(
+      "ไม่พบร้าน \"" + p.restaurantName + "\" ในย่าน" + (p.area || "ที่เลือก") +
+      " — ตรวจสอบชื่อร้านใหม่อีกครั้ง หรือเลือกย่านให้ถูกต้อง"
+    );
+  }
+  delete parsed.verified;
+
   // Always overwrite with what the user actually submitted
   parsed["Restaurant Name"] = p.restaurantName;
+  if (p.area)              parsed["Area"] = p.area;
   if (p.review)            parsed["ทำไมต้องกินร้านนี้"] = p.review;
   if (p.recommendMenu)     parsed["Recommend Menu 1"] = p.recommendMenu;
   if (p.recommendMenuDesc) parsed["คำอธิบาย Recommend Menu 1"] = p.recommendMenuDesc;

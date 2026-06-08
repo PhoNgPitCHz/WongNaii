@@ -263,10 +263,25 @@
 
   function scrollTop() { window.scrollTo({ top: 0, behavior: "smooth" }); }
 
+  // ---- Toast helper -----------------------------------------------
+  function showToast(type, message, duration = 6000) {
+    const container = document.getElementById("toast-container");
+    if (!container) return;
+    const toast = document.createElement("div");
+    toast.className = `toast toast--${type}`;
+    toast.innerHTML = `<span class="toast__icon">✉️</span><span class="toast__msg">${esc(message)}</span>`;
+    container.appendChild(toast);
+    const remove = () => {
+      toast.classList.add("is-hiding");
+      setTimeout(() => toast.remove(), 350);
+    };
+    toast.addEventListener("click", remove);
+    setTimeout(remove, duration);
+  }
+
   // ---- Add Restaurant modal ---------------------------------------
   const modal = document.getElementById("modal-add");
   const form = document.getElementById("add-form");
-  const status = document.getElementById("add-status");
 
   els.btnAdd.addEventListener("click", () => {
     const name = WongnaiiIdentity.getName();
@@ -281,30 +296,31 @@
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const submitBtn = document.getElementById("add-submit");
-    submitBtn.disabled = true;
-    status.className = "add-form-status is-info";
-    status.textContent = "⏳ กำลังบันทึก + ให้ AI เติมข้อมูล (อาจใช้เวลา 10–20 วินาที)";
+    const payload = {
+      submitterName: document.getElementById("f-submitter").value.trim(),
+      restaurantName: document.getElementById("f-restaurant").value.trim(),
+      area: document.getElementById("f-zone").value,
+      review: document.getElementById("f-review").value.trim(),
+      recommendMenu: document.getElementById("f-menu").value.trim(),
+      recommendMenuDesc: document.getElementById("f-menu-desc").value.trim(),
+    };
+    if (payload.submitterName) WongnaiiIdentity.setName(payload.submitterName);
+
+    // Close modal immediately — user can keep browsing
+    modal.classList.remove("is-open");
+    form.reset();
+
+    showToast("info", `กำลังตรวจสอบ "${payload.restaurantName}" ย่าน${payload.area}… (ใช้เวลา ~15 วิ)`, 20000);
 
     try {
-      const payload = {
-        submitterName: document.getElementById("f-submitter").value.trim(),
-        restaurantName: document.getElementById("f-restaurant").value.trim(),
-        review: document.getElementById("f-review").value.trim(),
-        recommendMenu: document.getElementById("f-menu").value.trim(),
-        recommendMenuDesc: document.getElementById("f-menu-desc").value.trim(),
-      };
-      if (payload.submitterName) WongnaiiIdentity.setName(payload.submitterName);
-
       await WongnaiiAPI.submitRestaurant(payload);
-      status.className = "add-form-status is-success";
-      status.textContent = "✓ บันทึกเรียบร้อย! กำลังโหลดร้านใหม่...";
-      setTimeout(() => location.reload(), 1200);
+      // Remove the "in progress" toast
+      document.querySelector(".toast--info")?.click();
+      showToast("success", `เพิ่มร้าน "${payload.restaurantName}" สำเร็จแล้ว! จะปรากฏหลัง reload`);
     } catch (err) {
       console.error(err);
-      status.className = "add-form-status is-error";
-      status.textContent = "✗ ผิดพลาด: " + err.message;
-      submitBtn.disabled = false;
+      document.querySelector(".toast--info")?.click();
+      showToast("error", err.message, 10000);
     }
   });
 })();
