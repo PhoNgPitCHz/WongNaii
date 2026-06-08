@@ -274,14 +274,26 @@
     try {
       const msgs = await WongnaiiAPI.getMessages(session.party.id, session.lastMsgTs);
       if (!msgs.length) return;
-      session.cachedMessages = (session.cachedMessages || []).concat(msgs);
-      msgs.forEach((m) => { session.lastMsgTs = Math.max(session.lastMsgTs, m.ts); });
+
+      // Guard against concurrent fetches returning the same messages twice:
+      // two refreshMessages() calls can be in-flight simultaneously (poll + manual
+      // post-send call) and both land with the same payload.
+      if (!session.seenMsgKeys) session.seenMsgKeys = new Set();
+      const newMsgs = msgs.filter((m) => {
+        const key = `${m.ts}:${m.user?.id ?? ""}:${m.message}`;
+        if (session.seenMsgKeys.has(key)) return false;
+        session.seenMsgKeys.add(key);
+        return true;
+      });
+      if (!newMsgs.length) return;
+
+      session.cachedMessages = (session.cachedMessages || []).concat(newMsgs);
+      newMsgs.forEach((m) => { session.lastMsgTs = Math.max(session.lastMsgTs, m.ts); });
       if (session.open) {
-        appendMessages(msgs);
+        appendMessages(newMsgs);
       } else {
-        // Count unread (excluding own)
         const myId = WongnaiiIdentity.getId();
-        session.unread += msgs.filter((m) => m.user?.id !== myId).length;
+        session.unread += newMsgs.filter((m) => m.user?.id !== myId).length;
         updateBubble();
       }
     } catch (e) { /* ignore */ }
