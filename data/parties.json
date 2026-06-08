@@ -207,6 +207,11 @@
         "name": "Pond",
         "joinedAt": 1780931121463,
         "host": true
+      },
+      {
+        "id": "5fa21d10-ff41-4da2-b949-993afecb28c1",
+        "name": "Nui",
+        "joinedAt": 1780931136279
       }
     ]
   }
