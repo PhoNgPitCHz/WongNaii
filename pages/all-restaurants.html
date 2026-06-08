@@ -27,15 +27,22 @@
       <p>เลือกตัวกรองที่ใช่ — แล้วให้เราหาร้านให้คุณ</p>
     </div>
 
+    <!-- Top 5 strip (rendered by JS) -->
+    <div id="top5-strip" class="ar-top5" hidden></div>
+
     <!-- Filter panel -->
     <div class="glass-card ar-filters">
+      <div class="ar-filter-group">
+        <label for="filter-name">ชื่อร้าน</label>
+        <input id="filter-name" class="glass-input" placeholder="ค้นหาชื่อร้าน...">
+      </div>
       <div class="ar-filter-group">
         <label for="filter-zone">ย่าน (Zone)</label>
         <select id="filter-zone" class="glass-input"><option value="">ทุกย่าน</option></select>
       </div>
       <div class="ar-filter-group">
-        <label for="filter-food">ประเภทอาหาร</label>
-        <select id="filter-food" class="glass-input"><option value="">ทุกประเภท</option></select>
+        <label for="filter-food">ประเทศ</label>
+        <select id="filter-food" class="glass-input"><option value="">ทุกประเทศ</option></select>
       </div>
       <div class="ar-filter-group">
         <label>จำนวนคน</label>
@@ -59,6 +66,7 @@
           <option value="rating-desc">คะแนน (สูง → ต่ำ)</option>
           <option value="rating-asc">คะแนน (ต่ำ → สูง)</option>
           <option value="reviews-desc">รีวิวเยอะสุด</option>
+          <option value="likes-desc">กดหัวใจเยอะสุด</option>
           <option value="name-asc">ชื่อ A–Z</option>
         </select>
         <button class="glass-button is-primary" id="btn-add-restaurant">➕ เพิ่มร้าน</button>

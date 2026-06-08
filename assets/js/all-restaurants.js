@@ -11,11 +11,13 @@
     pageTotal: document.getElementById("page-total"),
     prev: document.getElementById("btn-prev"),
     next: document.getElementById("btn-next"),
+    filterName: document.getElementById("filter-name"),
     filterZone: document.getElementById("filter-zone"),
     filterFood: document.getElementById("filter-food"),
     filterGroup: document.getElementById("filter-group"),
     sort: document.getElementById("sort-by"),
     btnAdd: document.getElementById("btn-add-restaurant"),
+    top5: document.getElementById("top5-strip"),
   };
 
   const state = {
@@ -23,7 +25,7 @@
     likes: {},
     parties: [],
     page: 1,
-    filters: { zone: "", food: "", group: "" },
+    filters: { zone: "", food: "", group: "", name: "" },
     sort: "random",
     randomSeed: Math.random(),
   };
@@ -41,6 +43,7 @@
   state.parties = parties || [];
 
   buildFilterOptions(restaurants);
+  renderTop5();
   render();
 
   async function safe(p, fallback) { try { return await p; } catch (e) { console.warn(e); return fallback; } }
@@ -56,7 +59,8 @@
   // ---- Filter / sort logic ----------------------------------------
   function applyFilters() {
     let out = state.all.slice();
-    const { zone, food, group } = state.filters;
+    const { zone, food, group, name } = state.filters;
+    if (name) out = out.filter((r) => (r.name || "").toLowerCase().includes(name.toLowerCase()));
     if (zone) out = out.filter((r) => r.area === zone);
     if (food) out = out.filter((r) => r.foodType === food);
     if (group) out = out.filter((r) => matchesGroup(r.groupSize, group));
@@ -65,10 +69,55 @@
       case "rating-desc":  out.sort((a, b) => (b.rating || 0) - (a.rating || 0)); break;
       case "rating-asc":   out.sort((a, b) => (a.rating || 0) - (b.rating || 0)); break;
       case "reviews-desc": out.sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0)); break;
+      case "likes-desc":   out.sort((a, b) => (state.likes[b.id]?.length || 0) - (state.likes[a.id]?.length || 0)); break;
       case "name-asc":     out.sort((a, b) => (a.name || "").localeCompare(b.name || "", "th")); break;
       default:             out = seededShuffle(out, state.randomSeed); break;
     }
     return out;
+  }
+
+  // ---- Top 5 strip ------------------------------------------------
+  function renderTop5() {
+    if (!els.top5 || !state.all.length) return;
+    const zone = state.filters.zone;
+    const source = zone ? state.all.filter((r) => r.area === zone) : state.all.slice();
+    const ranked = source.slice().sort((a, b) => {
+      const la = (state.likes[a.id] || []).length;
+      const lb = (state.likes[b.id] || []).length;
+      if (lb !== la) return lb - la;
+      return (b.rating || 0) - (a.rating || 0);
+    }).slice(0, 5);
+
+    if (!ranked.length) { els.top5.hidden = true; return; }
+    els.top5.hidden = false;
+
+    const label = zone ? esc(zone) : "ทั้งหมด";
+    const chipHtml = (r, i) => {
+      const lc = (state.likes[r.id] || []).length;
+      return `
+        <div class="ar-top5__chip">
+          <span class="ar-top5__rank">#${i + 1}</span>
+          <div class="ar-top5__info">
+            <div class="ar-top5__name">${esc(r.name)}</div>
+            <div class="ar-top5__stats">
+              ${lc ? `<span>♥ ${lc}</span>` : ""}
+              ${r.rating ? `<span>★ ${r.rating.toFixed(1)}</span>` : ""}
+              ${r.area && !zone ? `<span>📍 ${esc(r.area)}</span>` : ""}
+            </div>
+          </div>
+        </div>
+      `;
+    };
+    // Duplicate for seamless infinite loop (animate -50% = one full set)
+    const chips = ranked.map(chipHtml).join("");
+    els.top5.innerHTML = `
+      <div class="ar-top5__head">
+        <span class="ar-top5__title">🏆 Top 5 ย่าน${label}</span>
+      </div>
+      <div class="ar-top5__row">
+        <div class="ar-top5__track">${chips}${chips}</div>
+      </div>
+    `;
   }
 
   function matchesGroup(groupSizeText, requested) {
@@ -128,9 +177,12 @@
             <div class="r-card__title">${esc(r.name)}</div>
             <div class="r-card__type">${esc(r.foodType || "")}</div>
           </div>
-          <button class="r-heart ${liked ? "is-liked" : ""}" data-act="like" title="${likeCount} likes">
-            ${liked ? "♥" : "♡"}
-          </button>
+          <div class="r-heart-wrap">
+            <button class="r-heart ${liked ? "is-liked" : ""}" data-act="like">
+              ${liked ? "♥" : "♡"}
+            </button>
+            ${likeCount > 0 ? `<span class="r-heart-count">${likeCount}</span>` : ""}
+          </div>
         </div>
 
         <div class="r-card__meta">
@@ -162,7 +214,8 @@
   }
 
   // ---- Event wiring -----------------------------------------------
-  els.filterZone.addEventListener("change", () => { state.filters.zone = els.filterZone.value; state.page = 1; render(); });
+  els.filterName.addEventListener("input", () => { state.filters.name = els.filterName.value.trim(); state.page = 1; render(); });
+  els.filterZone.addEventListener("change", () => { state.filters.zone = els.filterZone.value; state.page = 1; renderTop5(); render(); });
   els.filterFood.addEventListener("change", () => { state.filters.food = els.filterFood.value; state.page = 1; render(); });
   els.sort.addEventListener("change", () => { state.sort = els.sort.value; state.page = 1; render(); });
 

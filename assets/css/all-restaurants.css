@@ -99,8 +99,11 @@
 }
 .r-card__type { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
 
-.r-heart {
+.r-heart-wrap {
   flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.r-heart {
   width: 40px; height: 40px;
   border-radius: 50%;
   display: grid; place-items: center;
@@ -111,6 +114,7 @@
 }
 .r-heart:hover { transform: scale(1.1); }
 .r-heart.is-liked { background: var(--heart); border-color: var(--heart); color: white; }
+.r-heart-count { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); line-height: 1; }
 
 .r-card__meta {
   display: flex; flex-wrap: wrap; gap: var(--space-2);
@@ -176,3 +180,59 @@
 .add-form-status.is-info    { display: block; background: var(--accent-soft); color: var(--text-strong); }
 .add-form-status.is-error   { display: block; background: rgba(255, 60, 60, 0.15); color: #d33; }
 .add-form-status.is-success { display: block; background: rgba(60, 200, 100, 0.15); color: #1a8040; }
+
+/* ---- Top 5 marquee strip ---- */
+.ar-top5 { margin-bottom: var(--space-5); }
+.ar-top5__head { margin-bottom: var(--space-3); }
+.ar-top5__title { font-weight: 700; font-size: 1rem; color: var(--text-strong); }
+
+.ar-top5__row {
+  overflow: hidden;
+  /* Fade edges left & right */
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.ar-top5__track {
+  display: flex;
+  gap: var(--space-3);
+  flex-shrink: 0;
+  padding-right: var(--space-3);
+  animation: ar-top5-scroll 28s linear infinite;
+}
+.ar-top5__row:hover .ar-top5__track { animation-play-state: paused; }
+
+@keyframes ar-top5-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.ar-top5__chip {
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  min-width: 190px;
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--blur)); backdrop-filter: blur(var(--blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  transition: transform var(--transition-fast);
+}
+.ar-top5__chip:hover { transform: translateY(-3px); }
+.ar-top5__rank {
+  font-family: var(--font-display);
+  font-size: 1.4rem; font-weight: 900;
+  color: var(--accent);
+  flex-shrink: 0; line-height: 1;
+}
+.ar-top5__info { min-width: 0; }
+.ar-top5__name {
+  font-weight: 700; font-size: 0.88rem;
+  color: var(--text-strong);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ar-top5__stats {
+  display: flex; gap: var(--space-2);
+  font-size: 0.75rem; color: var(--text-muted);
+  margin-top: 2px;
+}
