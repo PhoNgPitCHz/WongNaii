@@ -90,5 +90,26 @@
       }
     ],
     "closedAt": 1780928063784
+  },
+  {
+    "id": "1ed82343-5953-4dda-acc1-a9473f5075bb",
+    "restaurantId": "9Nine Korean Restaurant",
+    "partyName": "ปอปอ",
+    "hostName": "ปอ",
+    "hostId": "c789ec66-39f1-4009-9bb7-5971feb7522a",
+    "eatTime": "23.59 วันนี้",
+    "requiredPeople": 4,
+    "details": "",
+    "createdAt": 1780928304611,
+    "expiresAt": 1780929204611,
+    "status": "recruiting",
+    "members": [
+      {
+        "id": "c789ec66-39f1-4009-9bb7-5971feb7522a",
+        "name": "ปอ",
+        "joinedAt": 1780928304611,
+        "host": true
+      }
+    ]
   }
 ]
