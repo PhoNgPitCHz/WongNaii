@@ -71,7 +71,7 @@
     return row;
   }
 
-  container.appendChild(buildRow("left",  231));
-  container.appendChild(buildRow("right", 297));
-  container.appendChild(buildRow("left",  264));
+  container.appendChild(buildRow("left",  400));
+  container.appendChild(buildRow("right", 450));
+  container.appendChild(buildRow("left",  500));
 })();
