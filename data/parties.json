@@ -111,5 +111,26 @@
         "host": true
       }
     ]
+  },
+  {
+    "id": "7cf27c43-ada1-4af5-a51d-c291a311f99a",
+    "restaurantId": "Teenoi Suki",
+    "partyName": "มา ๆ",
+    "hostName": "Pond",
+    "hostId": "98823b10-89b5-4047-a0cd-152736a71019",
+    "eatTime": "20:00",
+    "requiredPeople": 4,
+    "details": "กฟหด",
+    "createdAt": 1780928609936,
+    "expiresAt": 1780929509936,
+    "status": "recruiting",
+    "members": [
+      {
+        "id": "98823b10-89b5-4047-a0cd-152736a71019",
+        "name": "Pond",
+        "joinedAt": 1780928609936,
+        "host": true
+      }
+    ]
   }
 ]
