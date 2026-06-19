@@ -70,13 +70,44 @@
     if (food) out = out.filter((r) => normFT(r.foodType) === food);
     if (group) out = out.filter((r) => matchesGroup(r.groupSize, group));
 
+    const userId  = WongnaiiIdentity.getId();
+    const myLike  = (r) => (state.likes[r.id] || []).includes(userId) ? 1 : 0;
+    const allLikes = (r) => (state.likes[r.id] || []).length;
+
     switch (state.sort) {
-      case "rating-desc":  out.sort((a, b) => (b.rating || 0) - (a.rating || 0)); break;
-      case "rating-asc":   out.sort((a, b) => (a.rating || 0) - (b.rating || 0)); break;
-      case "reviews-desc": out.sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0)); break;
-      case "likes-desc":   out.sort((a, b) => (state.likes[b.id]?.length || 0) - (state.likes[a.id]?.length || 0)); break;
-      case "name-asc":     out.sort((a, b) => (a.name || "").localeCompare(b.name || "", "th")); break;
-      default:             out = seededShuffle(out, state.randomSeed); break;
+      case "rating-desc":
+        out.sort((a, b) =>
+          myLike(b)  - myLike(a)  ||
+          (b.totalScore || 0) - (a.totalScore || 0) ||
+          (b.rating || 0) - (a.rating || 0));
+        break;
+      case "rating-asc":
+        out.sort((a, b) =>
+          myLike(b)  - myLike(a)  ||
+          (a.totalScore || 0) - (b.totalScore || 0) ||
+          (a.rating || 0) - (b.rating || 0));
+        break;
+      case "reviews-desc":
+        out.sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0));
+        break;
+      case "likes-desc":
+        out.sort((a, b) =>
+          myLike(b)  - myLike(a)  ||
+          allLikes(b) - allLikes(a) ||
+          (b.totalScore || 0) - (a.totalScore || 0) ||
+          (b.rating || 0) - (a.rating || 0));
+        break;
+      case "score-desc":
+        out.sort((a, b) =>
+          (b.totalScore || 0) - (a.totalScore || 0) ||
+          (b.rating || 0) - (a.rating || 0));
+        break;
+      case "name-asc":
+        out.sort((a, b) => (a.name || "").localeCompare(b.name || "", "th"));
+        break;
+      default:
+        out = seededShuffle(out, state.randomSeed);
+        break;
     }
     return out;
   }

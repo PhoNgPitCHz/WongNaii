@@ -29,12 +29,14 @@
   function close() {
     const el = document.getElementById("detail-modal");
     if (el) el.classList.remove("is-open");
+    document.body.style.overflow = "";
   }
 
   function show(r) {
     const scrim = getOrCreate();
     document.getElementById("detail-content").innerHTML = buildHtml(r);
     scrim.classList.add("is-open");
+    document.body.style.overflow = "hidden";
     const partyBtn = document.getElementById("detail-party-btn");
     if (partyBtn && window.WongnaiiParty) {
       partyBtn.addEventListener("click", () => { close(); window.WongnaiiParty.openCreator(r); });
