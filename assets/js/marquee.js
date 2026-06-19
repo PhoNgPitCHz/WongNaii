@@ -38,6 +38,10 @@
   function chip(r) {
     const el = document.createElement("div");
     el.className = "marquee-chip";
+    el.dataset.rid = r.id || r.name;
+    el.setAttribute("role", "button");
+    el.setAttribute("tabindex", "0");
+    el.style.cursor = "pointer";
     el.innerHTML = `
       <div class="marquee-chip__emoji" aria-hidden="true">${pickEmoji(r.name)}</div>
       <div style="min-width:0; flex:1">
@@ -74,4 +78,18 @@
   container.appendChild(buildRow("left",  400));
   container.appendChild(buildRow("right", 450));
   container.appendChild(buildRow("left",  500));
+
+  // Click chip → show detail popup
+  container.addEventListener("click", (e) => {
+    const chip = e.target.closest(".marquee-chip[data-rid]");
+    if (!chip || !window.WongnaiiDetail) return;
+    const r = restaurants.find((x) => (x.id || x.name) === chip.dataset.rid);
+    if (r) window.WongnaiiDetail.show(r);
+  });
+  container.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      const chip = e.target.closest(".marquee-chip[data-rid]");
+      if (chip) chip.click();
+    }
+  });
 })();

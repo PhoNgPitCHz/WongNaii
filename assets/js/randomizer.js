@@ -6,9 +6,12 @@
  * options are always present in the catalog (no dead-end branches).
  */
 (async function () {
-  const stepEl = document.getElementById("step");
+  const stepEl     = document.getElementById("step");
   const progressEl = document.getElementById("progress");
+  if (!stepEl || !progressEl) return; // not on this page
+
   const TOTAL_STEPS = 7;
+  const normFT = window.normalizeFoodType || ((t) => t);
 
   stepEl.innerHTML = `<div class="ar-loading">กำลังโหลดร้านอาหาร...</div>`;
 
@@ -25,7 +28,6 @@
   }
 
   // ---------- Define question bank --------------------------------
-  // Each question: { id, title, hint, getOptions(pool), filter(opt, r) }
   const QUESTIONS = [
     {
       id: "zone",
@@ -38,19 +40,19 @@
       id: "foodType",
       title: "อยากกินอาหารชาติไหน / ประเภทอะไร?",
       hint: "บอกหมวดอาหารที่อยากกินวันนี้",
-      getOptions: (pool) => topOptions(pool, "foodType", 6, "🍽️"),
-      filter: (opt, r) => !opt.value || r.foodType === opt.value,
+      getOptions: (pool) => topOptions(pool, "foodType", 6, "🍽️", normFT),
+      filter: (opt, r) => !opt.value || normFT(r.foodType) === opt.value,
     },
     {
       id: "groupSize",
       title: "ไปกันกี่คน?",
       hint: "ขนาดของกลุ่ม",
       getOptions: () => [
-        { value: "1",  label: "คนเดียว",     emoji: "🧍" },
-        { value: "2",  label: "2 คน",        emoji: "👫" },
-        { value: "4",  label: "3–4 คน",      emoji: "👨‍👩‍👧" },
-        { value: "8",  label: "5–8 คน",      emoji: "👨‍👩‍👧‍👦" },
-        { value: "10", label: "10+ คน",      emoji: "🎉" },
+        { value: "1",  label: "คนเดียว", emoji: "🧍" },
+        { value: "2",  label: "2 คน",    emoji: "👫" },
+        { value: "4",  label: "3–4 คน",  emoji: "👨‍👩‍👧" },
+        { value: "8",  label: "5–8 คน",  emoji: "👨‍👩‍👧‍👦" },
+        { value: "10", label: "10+ คน",  emoji: "🎉" },
       ],
       filter: (opt, r) => {
         const text = (r.groupSize || "").toLowerCase();
@@ -66,10 +68,10 @@
       title: "งบประมาณคร่าว ๆ?",
       hint: "ราคาต่อคน",
       getOptions: () => [
-        { value: "low",    label: "ไม่เกิน 200",   emoji: "💰" },
-        { value: "mid",    label: "200–500",        emoji: "💸" },
-        { value: "high",   label: "500+",           emoji: "💎" },
-        { value: "any",    label: "ไม่จำกัด",       emoji: "✨" },
+        { value: "low",  label: "ไม่เกิน 200", emoji: "💰" },
+        { value: "mid",  label: "200–500",      emoji: "💸" },
+        { value: "high", label: "500+",         emoji: "💎" },
+        { value: "any",  label: "ไม่จำกัด",     emoji: "✨" },
       ],
       filter: (opt, r) => {
         if (opt.value === "any") return true;
@@ -88,8 +90,8 @@
       title: "อยากได้ร้านที่คะแนนเท่าไร?",
       hint: "Google Rating",
       getOptions: () => [
-        { value: "4.5", label: "4.5 ขึ้นไป", emoji: "⭐" },
-        { value: "4.0", label: "4.0 ขึ้นไป", emoji: "⭐" },
+        { value: "4.5", label: "4.5 ขึ้นไป",  emoji: "⭐" },
+        { value: "4.0", label: "4.0 ขึ้นไป",  emoji: "⭐" },
         { value: "any", label: "เท่าไรก็ได้", emoji: "🤷" },
       ],
       filter: (opt, r) => {
@@ -123,13 +125,13 @@
         { value: "fancy",   label: "ฉลองหน่อย",          emoji: "🥂" },
         { value: "spicy",   label: "ขออะไรเผ็ด ๆ",       emoji: "🌶️" },
         { value: "sweet",   label: "ของหวาน",            emoji: "🍰" },
-        { value: "any",     label: "อะไรก็ได้",         emoji: "🎲" },
+        { value: "any",     label: "อะไรก็ได้",          emoji: "🎲" },
       ],
       filter: (opt, r) => {
         if (opt.value === "any") return true;
         const blob = ((r.foodType || "") + " " + (r.menus || []).map(m => m.name).join(" ")).toLowerCase();
         if (opt.value === "spicy")   return /เผ็ด|ส้มตำ|ต้มยำ|แกง|ยำ/.test(blob);
-        if (opt.value === "sweet")   return /หวาน|ขนม|เค้ก|ไอติม|cafe|cafe|dessert|เบเกอ/.test(blob);
+        if (opt.value === "sweet")   return /หวาน|ขนม|เค้ก|ไอติม|cafe|dessert|เบเกอ/.test(blob);
         if (opt.value === "comfort") return /ก๋วย|ข้าวต้ม|โจ๊ก|ราเมง|ซุป|noodle|soup/.test(blob);
         if (opt.value === "fancy")   return /พรีเมียม|fine|premium|ซีฟู้ด|steak|ญี่ปุ่น/.test(blob);
         return true;
@@ -137,11 +139,11 @@
     },
   ];
 
-  // Build options ranked by frequency in the current pool — keeps the quiz adaptive.
-  function topOptions(pool, key, max, emoji) {
+  // Build options ranked by frequency — normalizer applied when provided
+  function topOptions(pool, key, max, emoji, normalizer) {
     const counts = new Map();
     for (const r of pool) {
-      const v = r[key];
+      const v = normalizer ? normalizer(r[key]) : r[key];
       if (!v) continue;
       counts.set(v, (counts.get(v) || 0) + 1);
     }
@@ -155,7 +157,7 @@
   // ---------- Quiz state machine ----------------------------------
   let step = 0;
   let pool = restaurants.slice();
-  const history = []; // [{ qIndex, optionIndex, poolBefore }]
+  const history = [];
 
   renderProgress();
   renderStep();
@@ -189,7 +191,7 @@
         `).join("")}
       </div>
       <div class="quiz-actions">
-        <button class="glass-button is-ghost" id="btn-back" ${step === 0 ? "disabled" : ""}>← ย้อนกลับ</button>
+        ${step > 0 ? `<button class="glass-button is-ghost" id="btn-back">← ย้อนกลับ</button>` : `<span></span>`}
         <span style="color: var(--text-muted); font-size: .9rem">เหลือ ${pool.length} ร้านที่ตรงเงื่อนไข</span>
       </div>
     `;
@@ -199,26 +201,27 @@
       if (!btn) return;
       const opt = options[parseInt(btn.dataset.i, 10)];
       const next = pool.filter((r) => q.filter(opt, r));
-      // If the filter would empty the pool, keep the pool and just advance.
       history.push({ qIndex: step, option: opt, poolBefore: pool });
       pool = next.length ? next : pool;
       step++;
       renderStep();
     });
 
-    document.getElementById("btn-back").addEventListener("click", () => {
-      if (step === 0) return;
-      step--;
-      const last = history.pop();
-      if (last) pool = last.poolBefore;
-      renderStep();
-    });
+    const backBtn = document.getElementById("btn-back");
+    if (backBtn) {
+      backBtn.addEventListener("click", () => {
+        if (step === 0) return;
+        step--;
+        const last = history.pop();
+        if (last) pool = last.poolBefore;
+        renderStep();
+      });
+    }
   }
 
   function renderResult() {
     const choice = pool[Math.floor(Math.random() * pool.length)] || restaurants[0];
 
-    // Fill progress bar fully
     progressEl.querySelectorAll("span").forEach((s) => { s.classList.add("is-done"); s.classList.remove("is-current"); });
 
     stepEl.innerHTML = `
@@ -226,9 +229,9 @@
         <div class="badge">🎯 เราเลือกให้คุณแล้ว</div>
         <h2>${esc(choice.name)}</h2>
         <div class="meta">
-          ${choice.area ? `<span class="glass-pill">📍 ${esc(choice.area)}</span>` : ""}
-          ${choice.foodType ? `<span class="glass-pill">${esc(choice.foodType)}</span>` : ""}
-          ${choice.rating ? `<span class="glass-pill">★ ${choice.rating.toFixed(1)}</span>` : ""}
+          ${choice.area       ? `<span class="glass-pill">📍 ${esc(choice.area)}</span>` : ""}
+          ${choice.foodType   ? `<span class="glass-pill">${esc(choice.foodType)}</span>` : ""}
+          ${choice.rating     ? `<span class="glass-pill">★ ${choice.rating.toFixed(1)}</span>` : ""}
           ${choice.priceRange ? `<span class="glass-pill">${esc(choice.priceRange)}</span>` : ""}
         </div>
         ${choice.pitch ? `<p style="color: var(--text-muted); max-width: 540px; margin: 0 auto var(--space-4)">${esc(choice.pitch)}</p>` : ""}
@@ -246,7 +249,7 @@
             </ul>
           </div>` : ""}
 
-        ${choice.hours ? `<p style="color: var(--text-muted); font-size: .9rem; margin-bottom: var(--space-2)">🕐 ${esc(choice.hours)}</p>` : ""}
+        ${choice.hours  ? `<p style="color: var(--text-muted); font-size: .9rem; margin-bottom: var(--space-2)">🕐 ${esc(choice.hours)}</p>`  : ""}
         ${choice.nearby ? `<p style="color: var(--text-muted); font-size: .9rem; margin-bottom: var(--space-4)">🚇 ${esc(choice.nearby)}</p>` : ""}
 
         <div class="result-actions">

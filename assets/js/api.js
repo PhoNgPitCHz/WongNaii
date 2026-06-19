@@ -106,3 +106,25 @@ window.WongnaiiAPI = (function () {
     getMessages: (partyId, since = 0) => call("getMessages", { partyId, since }),
   };
 })();
+
+/**
+ * Normalizes detailed food-type strings to broad parent categories.
+ * e.g. "อาหารไทยพรีเมี่ยม" → "อาหารไทย", "อาหารญี่ปุ่น/ซูซิ" → "อาหารญี่ปุ่น"
+ */
+window.normalizeFoodType = function (t) {
+  if (!t) return "";
+  const s = t.toLowerCase().trim();
+  if (s.includes("ซีฟู้ด") || s.includes("seafood"))          return "อาหารทะเล";
+  if (s.includes("ไทย"))                                       return "อาหารไทย";
+  if (s.includes("ทะเล"))                                      return "อาหารทะเล";
+  if (s.includes("ญี่ปุ่น") || s.includes("ซูซิ") || s.includes("ซูชิ") || s.includes("sushi") || s.includes("ราเมง") || s.includes("ราเม็ง") || s.includes("ramen")) return "อาหารญี่ปุ่น";
+  if (s.includes("เกาหลี") || s.includes("korean"))           return "อาหารเกาหลี";
+  if (s.includes("จีน") || s.includes("chinese") || s.includes("ติ่มซำ")) return "อาหารจีน";
+  if (s.includes("อิตาลี") || s.includes("italian") || s.includes("pasta") || s.includes("pizza")) return "อาหารอิตาลี";
+  if (s.includes("อเมริกัน") || s.includes("american") || s.includes("เบอร์เกอร์") || s.includes("burger")) return "อาหารอเมริกัน";
+  if (s.includes("อินเดีย") || s.includes("indian"))          return "อาหารอินเดีย";
+  if (s.includes("คาเฟ่") || s.includes("cafe") || s.includes("dessert") || s.includes("ของหวาน") || s.includes("เบเกอ")) return "คาเฟ่/ขนม";
+  if (s.includes("เวียดนาม") || s.includes("vietnamese"))     return "อาหารเวียดนาม";
+  if (s.includes("ฝรั่งเศส") || s.includes("french"))        return "อาหารฝรั่งเศส";
+  return t;
+};

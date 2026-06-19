@@ -1,24 +1,29 @@
 /**
  * All-Restaurants page — filter, sort, paginate, render cards.
+ * Works as a standalone page (pages/all-restaurants.html) and embedded in index.html.
  */
 (async function () {
   const PAGE_SIZE = 12;
 
   const els = {
-    grid: document.getElementById("grid"),
-    count: document.getElementById("result-count"),
+    grid:        document.getElementById("grid"),
+    count:       document.getElementById("result-count"),
     pageCurrent: document.getElementById("page-current"),
-    pageTotal: document.getElementById("page-total"),
-    prev: document.getElementById("btn-prev"),
-    next: document.getElementById("btn-next"),
-    filterName: document.getElementById("filter-name"),
-    filterZone: document.getElementById("filter-zone"),
-    filterFood: document.getElementById("filter-food"),
+    pageTotal:   document.getElementById("page-total"),
+    prev:        document.getElementById("btn-prev"),
+    next:        document.getElementById("btn-next"),
+    filterName:  document.getElementById("filter-name"),
+    filterZone:  document.getElementById("filter-zone"),
+    filterFood:  document.getElementById("filter-food"),
     filterGroup: document.getElementById("filter-group"),
-    sort: document.getElementById("sort-by"),
-    btnAdd: document.getElementById("btn-add-restaurant"),
-    top5: document.getElementById("top5-strip"),
+    sort:        document.getElementById("sort-by"),
+    btnAdd:      document.getElementById("btn-add-restaurant"),
+    top5:        document.getElementById("top5-strip"),
   };
+
+  if (!els.grid) return; // not on this page
+
+  const normFT = window.normalizeFoodType || ((t) => t);
 
   const state = {
     all: [],
@@ -51,7 +56,7 @@
   // ---- Filter setup -----------------------------------------------
   function buildFilterOptions(list) {
     const zones = [...new Set(list.map((r) => r.area).filter(Boolean))].sort();
-    const foods = [...new Set(list.map((r) => r.foodType).filter(Boolean))].sort();
+    const foods = [...new Set(list.map((r) => normFT(r.foodType)).filter(Boolean))].sort();
     for (const z of zones) els.filterZone.insertAdjacentHTML("beforeend", `<option>${esc(z)}</option>`);
     for (const f of foods) els.filterFood.insertAdjacentHTML("beforeend", `<option>${esc(f)}</option>`);
   }
@@ -62,7 +67,7 @@
     const { zone, food, group, name } = state.filters;
     if (name) out = out.filter((r) => (r.name || "").toLowerCase().includes(name.toLowerCase()));
     if (zone) out = out.filter((r) => r.area === zone);
-    if (food) out = out.filter((r) => r.foodType === food);
+    if (food) out = out.filter((r) => normFT(r.foodType) === food);
     if (group) out = out.filter((r) => matchesGroup(r.groupSize, group));
 
     switch (state.sort) {
@@ -95,7 +100,7 @@
     const chipHtml = (r, i) => {
       const lc = (state.likes[r.id] || []).length;
       return `
-        <div class="ar-top5__chip">
+        <div class="ar-top5__chip" data-rid="${esc(r.id || r.name)}" style="cursor:pointer" role="button" tabindex="0">
           <span class="ar-top5__rank">#${i + 1}</span>
           <div class="ar-top5__info">
             <div class="ar-top5__name">${esc(r.name)}</div>
@@ -108,7 +113,6 @@
         </div>
       `;
     };
-    // Duplicate for seamless infinite loop (animate -50% = one full set)
     const chips = ranked.map(chipHtml).join("");
     els.top5.innerHTML = `
       <div class="ar-top5__head">
@@ -126,8 +130,8 @@
     if (n >= 10) return /(กลุ่ม|ใหญ่|รองรับกลุ่ม|10|มาก)/.test(t);
     if (n >= 8)  return /(กลุ่ม|รองรับ|เหมาะ|มาก|8)/.test(t);
     if (n >= 4)  return /(กลุ่ม|เหมาะ|รองรับ|4|ครอบครัว)/.test(t);
-    if (n >= 2)  return /(เหมาะ|คู่|2)/.test(t) || true;  // most restaurants fit pairs
-    return true; // solo — almost always OK
+    if (n >= 2)  return /(เหมาะ|คู่|2)/.test(t) || true;
+    return true;
   }
 
   function seededShuffle(arr, seed) {
@@ -170,7 +174,7 @@
     const likeCount = (state.likes[r.id] || []).length;
     const activeParty = state.parties.find((p) => p.restaurantId === r.id && p.status !== "closed");
     return `
-      <article class="glass-card r-card" data-id="${esc(r.id)}">
+      <article class="glass-card r-card" data-id="${esc(r.id)}" style="cursor:pointer">
         ${activeParty ? `<div class="r-card__party-badge">🔥 มี Party กำลังเปิดอยู่</div>` : ""}
         <div class="r-card__top">
           <div>
@@ -232,6 +236,15 @@
   els.prev.addEventListener("click", () => { if (state.page > 1) { state.page--; render(); scrollTop(); } });
   els.next.addEventListener("click", () => { state.page++; render(); scrollTop(); });
 
+  // Top 5 chip click → detail popup
+  els.top5.addEventListener("click", (e) => {
+    const chip = e.target.closest(".ar-top5__chip[data-rid]");
+    if (!chip || !window.WongnaiiDetail) return;
+    const r = state.all.find((x) => (x.id || x.name) === chip.dataset.rid);
+    if (r) window.WongnaiiDetail.show(r);
+  });
+
+  // Card click → actions or detail popup
   els.grid.addEventListener("click", async (e) => {
     const card = e.target.closest(".r-card");
     if (!card) return;
@@ -251,17 +264,31 @@
         console.error(err);
         alert("ไม่สามารถบันทึก Like ได้ — ตรวจ Apps Script config");
       }
+      return;
     }
 
     if (e.target.closest("[data-act=find-buddies]")) {
       window.WongnaiiParty.openCreator(restaurant);
+      return;
     }
     if (e.target.closest("[data-act=join-list]")) {
       window.WongnaiiParty.openSeeker(restaurant, state.parties);
+      return;
+    }
+    if (e.target.closest("a")) return;
+
+    // Click on card body → show detail popup
+    if (restaurant && window.WongnaiiDetail) {
+      window.WongnaiiDetail.show(restaurant);
     }
   });
 
-  function scrollTop() { window.scrollTo({ top: 0, behavior: "smooth" }); }
+  // Scroll to top of the section (not page top, since on home page hero is above)
+  function scrollTop() {
+    const sec = document.getElementById("section-restaurants");
+    if (sec) sec.scrollIntoView({ behavior: "smooth" });
+    else window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   // ---- Toast helper -----------------------------------------------
   function showToast(type, message, duration = 6000) {
@@ -281,7 +308,7 @@
 
   // ---- Add Restaurant modal ---------------------------------------
   const modal = document.getElementById("modal-add");
-  const form = document.getElementById("add-form");
+  const form  = document.getElementById("add-form");
 
   els.btnAdd.addEventListener("click", () => {
     const name = WongnaiiIdentity.getName();
@@ -297,16 +324,15 @@
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const payload = {
-      submitterName: document.getElementById("f-submitter").value.trim(),
-      restaurantName: document.getElementById("f-restaurant").value.trim(),
-      area: document.getElementById("f-zone").value,
-      review: document.getElementById("f-review").value.trim(),
-      recommendMenu: document.getElementById("f-menu").value.trim(),
+      submitterName:   document.getElementById("f-submitter").value.trim(),
+      restaurantName:  document.getElementById("f-restaurant").value.trim(),
+      area:            document.getElementById("f-zone").value,
+      review:          document.getElementById("f-review").value.trim(),
+      recommendMenu:   document.getElementById("f-menu").value.trim(),
       recommendMenuDesc: document.getElementById("f-menu-desc").value.trim(),
     };
     if (payload.submitterName) WongnaiiIdentity.setName(payload.submitterName);
 
-    // Close modal immediately — user can keep browsing
     modal.classList.remove("is-open");
     form.reset();
 
@@ -314,7 +340,6 @@
 
     try {
       await WongnaiiAPI.submitRestaurant(payload);
-      // Remove the "in progress" toast
       document.querySelector(".toast--info")?.click();
       showToast("success", `เพิ่มร้าน "${payload.restaurantName}" สำเร็จแล้ว! จะปรากฏหลัง reload`);
     } catch (err) {

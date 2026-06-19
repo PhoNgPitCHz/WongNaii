@@ -162,6 +162,7 @@
 .ar-empty, .ar-loading {
   text-align: center; padding: var(--space-8); color: var(--text-muted);
 }
+.ar-empty { grid-column: 1 / -1; }
 .ar-loading { animation: pulse 1.4s ease-in-out infinite; }
 
 /* ---- Add Restaurant modal form ---- */
@@ -215,6 +216,29 @@
 
 @keyframes toast-in  { from { opacity:0; transform:translateY(16px) scale(.95); } to { opacity:1; transform:translateY(0) scale(1); } }
 @keyframes toast-out { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(10px); } }
+
+/* ---- Restaurant detail popup ---- */
+.detail-modal {
+  width: min(640px, 92vw);
+  position: relative;
+  padding: 0;
+  overflow: visible;
+}
+.detail-close {
+  position: absolute;
+  top: var(--space-4); right: var(--space-4);
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  display: grid; place-items: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+  z-index: 1;
+}
+.detail-close:hover { background: var(--glass-bg-hi); color: var(--text-strong); }
 
 /* ---- Top 5 marquee strip ---- */
 .ar-top5 { margin-bottom: var(--space-5); }
