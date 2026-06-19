@@ -88,13 +88,22 @@ window.WongnaiiAPI = (function () {
       notes: raw["Notes"],
       pros: raw["จุดเด่น"],
       cons: raw["จุดด้อย"],
-      ratingQuality:     parseFloat(raw["Rating & Review Quality (คุณภาพคะแนนและรีวิว)"]) || null,
-      groupSuitability:  parseFloat(raw["Group Suitability (ความเหมาะกับกลุ่ม)"]) || null,
-      priceSuitability:  parseFloat(raw["Price Suitability (ความเหมาะของราคา)"]) || null,
-      travelConvenience: parseFloat(raw["Travel Convenience (ความสะดวกการเดินทาง)"]) || null,
-      dataCompleteness:  parseFloat(raw["Data Completeness (ความครบของข้อมูล)"]) || null,
-      uniqueness:        parseFloat(raw["Uniqueness / Experience (ความพิเศษ/ประสบการณ์)"]) || null,
-      totalScore:        parseFloat(raw["คะแนนรวม"]) || null,
+      ...(() => {
+        const scoreField = (prefix) => {
+          const lo = prefix.toLowerCase();
+          const k = Object.keys(raw).find((h) => h.toLowerCase().startsWith(lo));
+          return parseFloat(k ? raw[k] : "") || null;
+        };
+        return {
+          ratingQuality:     scoreField("Rating & Review Quality"),
+          groupSuitability:  scoreField("Group Suitability"),
+          priceSuitability:  scoreField("Price Suitability"),
+          travelConvenience: scoreField("Travel Convenience"),
+          dataCompleteness:  scoreField("Data Completeness"),
+          uniqueness:        scoreField("Uniqueness / Experience"),
+          totalScore:        parseFloat(raw["คะแนนรวม"]) || null,
+        };
+      })(),
       raw,  // keep original for debugging
     };
   }
