@@ -182,6 +182,7 @@
             <div class="r-card__type">${esc(r.foodType || "")}</div>
           </div>
           <div class="r-heart-wrap">
+            ${r.totalScore != null ? `<div class="r-score-badge">${r.totalScore}<span class="r-score-badge__denom">/100</span></div>` : ""}
             <button class="r-heart ${liked ? "is-liked" : ""}" data-act="like">
               ${liked ? "♥" : "♡"}
             </button>

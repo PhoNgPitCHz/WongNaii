@@ -108,6 +108,12 @@
   flex-shrink: 0;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
 }
+/* Total score badge above heart button on card */
+.r-score-badge {
+  font-size: 1rem; font-weight: 800;
+  color: var(--accent); line-height: 1; text-align: center;
+}
+.r-score-badge__denom { font-size: 0.58rem; font-weight: 600; color: var(--text-muted); }
 .r-heart {
   width: 40px; height: 40px;
   border-radius: 50%;
@@ -221,6 +227,43 @@
 
 @keyframes toast-in  { from { opacity:0; transform:translateY(16px) scale(.95); } to { opacity:1; transform:translateY(0) scale(1); } }
 @keyframes toast-out { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(10px); } }
+
+/* ---- Total score (in detail popup and standalone randomizer result) ---- */
+.detail-total-score {
+  display: flex; align-items: baseline; justify-content: center; gap: 3px;
+  margin-bottom: var(--space-3);
+}
+.detail-total-score__num {
+  font-size: 2.2rem; font-weight: 900; color: var(--accent); line-height: 1;
+}
+.detail-total-score__denom { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); }
+
+/* ---- Score bars (AE-AJ breakdown in popup) ---- */
+.score-bars {
+  display: flex; flex-direction: column; gap: 8px;
+  margin: var(--space-4) 0; text-align: left;
+}
+.score-bar { display: flex; align-items: center; gap: var(--space-3); }
+.score-bar__label {
+  font-size: 0.75rem; color: var(--text-muted);
+  flex: 0 0 130px; line-height: 1.3;
+}
+.score-bar__track {
+  flex: 1; height: 6px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px; overflow: hidden;
+}
+.score-bar__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(.2,.8,.2,1);
+}
+.score-bar__val {
+  font-size: 0.72rem; font-weight: 700; color: var(--text-strong);
+  flex: 0 0 36px; text-align: right;
+}
 
 /* ---- Restaurant detail popup ---- */
 .detail-modal {

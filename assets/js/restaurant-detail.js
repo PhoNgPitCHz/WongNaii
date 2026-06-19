@@ -42,11 +42,17 @@
   }
 
   function buildHtml(r) {
+    const scoreBars = window.buildScoreBars ? window.buildScoreBars(r) : "";
     return `
       <button class="detail-close" data-detail-close aria-label="ปิด">✕</button>
       <div class="quiz-result">
         <div class="badge">🍽️ รายละเอียดร้าน</div>
         <h2>${esc(r.name)}</h2>
+        ${r.totalScore != null ? `
+          <div class="detail-total-score">
+            <span class="detail-total-score__num">${r.totalScore}</span>
+            <span class="detail-total-score__denom">/100 คะแนน</span>
+          </div>` : ""}
         <div class="meta">
           ${r.area       ? `<span class="glass-pill">📍 ${esc(r.area)}</span>` : ""}
           ${r.foodType   ? `<span class="glass-pill">${esc(r.foodType)}</span>` : ""}
@@ -54,6 +60,7 @@
           ${r.priceRange ? `<span class="glass-pill">${esc(r.priceRange)}</span>` : ""}
         </div>
         ${r.pitch ? `<p style="color:var(--text-muted);max-width:540px;margin:0 auto var(--space-4)">${esc(r.pitch)}</p>` : ""}
+        ${scoreBars}
         ${r.menus?.length ? `
           <div class="menus">
             <h3>🍽️ เมนูแนะนำ</h3>

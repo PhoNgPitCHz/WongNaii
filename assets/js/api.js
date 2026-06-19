@@ -88,6 +88,13 @@ window.WongnaiiAPI = (function () {
       notes: raw["Notes"],
       pros: raw["จุดเด่น"],
       cons: raw["จุดด้อย"],
+      ratingQuality:     parseFloat(raw["Rating & Review Quality (คุณภาพคะแนนและรีวิว)"]) || null,
+      groupSuitability:  parseFloat(raw["Group Suitability (ความเหมาะกับกลุ่ม)"]) || null,
+      priceSuitability:  parseFloat(raw["Price Suitability (ความเหมาะของราคา)"]) || null,
+      travelConvenience: parseFloat(raw["Travel Convenience (ความสะดวกการเดินทาง)"]) || null,
+      dataCompleteness:  parseFloat(raw["Data Completeness (ความครบของข้อมูล)"]) || null,
+      uniqueness:        parseFloat(raw["Uniqueness / Experience (ความพิเศษ/ประสบการณ์)"]) || null,
+      totalScore:        parseFloat(raw["คะแนนรวม"]) || null,
       raw,  // keep original for debugging
     };
   }
@@ -106,6 +113,35 @@ window.WongnaiiAPI = (function () {
     getMessages: (partyId, since = 0) => call("getMessages", { partyId, since }),
   };
 })();
+
+/**
+ * Builds HTML score bars for AE-AJ columns.
+ * Used in restaurant-detail.js and randomizer.js standalone result.
+ */
+window.buildScoreBars = function (r) {
+  const bars = [
+    { label: "คุณภาพคะแนนและรีวิว", value: r.ratingQuality,     max: 25 },
+    { label: "ความเหมาะกับกลุ่ม",   value: r.groupSuitability,  max: 20 },
+    { label: "ความเหมาะของราคา",     value: r.priceSuitability,  max: 15 },
+    { label: "ความสะดวกเดินทาง",     value: r.travelConvenience, max: 15 },
+    { label: "ความครบของข้อมูล",     value: r.dataCompleteness,  max: 15 },
+    { label: "ความพิเศษ/ประสบการณ์", value: r.uniqueness,        max: 10 },
+  ].filter((b) => b.value != null && b.value > 0);
+  if (!bars.length) return "";
+  const e = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  return `
+    <div class="score-bars">
+      ${bars.map((b) => `
+        <div class="score-bar">
+          <div class="score-bar__label">${e(b.label)}</div>
+          <div class="score-bar__track">
+            <div class="score-bar__fill" style="width:${Math.min(100, Math.round((b.value / b.max) * 100))}%"></div>
+          </div>
+          <div class="score-bar__val">${b.value}/${b.max}</div>
+        </div>`).join("")}
+    </div>`;
+};
 
 /**
  * Normalizes detailed food-type strings to broad parent categories.

@@ -241,10 +241,16 @@
     }
 
     // Standalone page: show result inline inside the quiz card
+    const scoreBars = window.buildScoreBars ? window.buildScoreBars(choice) : "";
     stepEl.innerHTML = `
       <div class="quiz-result">
         <div class="badge">🎯 เราเลือกให้คุณแล้ว</div>
         <h2>${esc(choice.name)}</h2>
+        ${choice.totalScore != null ? `
+          <div class="detail-total-score">
+            <span class="detail-total-score__num">${choice.totalScore}</span>
+            <span class="detail-total-score__denom">/100 คะแนน</span>
+          </div>` : ""}
         <div class="meta">
           ${choice.area       ? `<span class="glass-pill">📍 ${esc(choice.area)}</span>` : ""}
           ${choice.foodType   ? `<span class="glass-pill">${esc(choice.foodType)}</span>` : ""}
@@ -252,6 +258,7 @@
           ${choice.priceRange ? `<span class="glass-pill">${esc(choice.priceRange)}</span>` : ""}
         </div>
         ${choice.pitch ? `<p style="color: var(--text-muted); max-width: 540px; margin: 0 auto var(--space-4)">${esc(choice.pitch)}</p>` : ""}
+        ${scoreBars}
 
         ${choice.menus?.length ? `
           <div class="menus">

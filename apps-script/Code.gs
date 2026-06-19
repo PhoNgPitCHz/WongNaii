@@ -102,6 +102,13 @@ function listRestaurants() {
         notes: raw["Notes"],
         pros: raw["จุดเด่น"],
         cons: raw["จุดด้อย"],
+        ratingQuality:     parseFloat(raw["Rating & Review Quality (คุณภาพคะแนนและรีวิว)"]) || null,
+        groupSuitability:  parseFloat(raw["Group Suitability (ความเหมาะกับกลุ่ม)"]) || null,
+        priceSuitability:  parseFloat(raw["Price Suitability (ความเหมาะของราคา)"]) || null,
+        travelConvenience: parseFloat(raw["Travel Convenience (ความสะดวกการเดินทาง)"]) || null,
+        dataCompleteness:  parseFloat(raw["Data Completeness (ความครบของข้อมูล)"]) || null,
+        uniqueness:        parseFloat(raw["Uniqueness / Experience (ความพิเศษ/ประสบการณ์)"]) || null,
+        totalScore:        parseFloat(raw["คะแนนรวม"]) || null,
       };
     });
 }
@@ -145,6 +152,16 @@ function geminiAutoFill(p) {
     "STEP 2 — ถ้า verified: \"yes\" เท่านั้น ให้เติมข้อมูลที่เหลือให้สมจริง ถ้าไม่ทราบให้ใช้คำว่า 'ไม่ระบุ'",
     "ตอบกลับเป็น JSON ตรงตาม keys ที่กำหนดเท่านั้น ห้ามมีข้อความอื่น",
     "",
+    "STEP 3 — ประเมินคะแนน (ตัวเลขจำนวนเต็ม ไม่เกินค่าสูงสุด):",
+    "  Rating & Review Quality (คุณภาพคะแนนและรีวิว): max 25 — จาก Google Rating และจำนวนรีวิว (4.8+ / 1000+ reviews = 25)",
+    "  Group Suitability (ความเหมาะกับกลุ่ม): max 20 — เหมาะกับกลุ่มแค่ไหน มีที่นั่งหลายคน จองได้",
+    "  Price Suitability (ความเหมาะของราคา): max 15 — ราคาสมเหตุสมผล คุ้มค่ากับคุณภาพ",
+    "  Travel Convenience (ความสะดวกการเดินทาง): max 15 — ใกล้ BTS/MRT มีที่จอด หาง่าย",
+    "  Data Completeness (ความครบของข้อมูล): max 15 — ข้อมูลร้านครบถ้วนในฟิลด์ต่าง ๆ",
+    "  Uniqueness / Experience (ความพิเศษ/ประสบการณ์): max 10 — จุดเด่นเฉพาะตัว บรรยากาศ ประสบการณ์หายาก",
+    "  คะแนนรวม: ผลรวม 6 หัวข้อ (max 100)",
+    "",
+    "",
     "ข้อมูลที่ผู้ใช้ให้มา:",
     `- Restaurant Name: ${p.restaurantName}`,
     `- ย่าน/โซน: ${p.area || "ไม่ระบุ"}`,
@@ -153,7 +170,7 @@ function geminiAutoFill(p) {
     `- คำอธิบาย Recommend Menu 1: ${p.recommendMenuDesc || ""}`,
     `- ผู้ส่ง: ${p.submitterName || ""}`,
     "",
-    "ให้ส่ง JSON ที่มี keys ดังนี้ (ใช้ string ทุกตัว):",
+    "ให้ส่ง JSON ที่มี keys ดังนี้ (string ทุกตัว ยกเว้นคะแนนให้เป็น integer):",
     '"verified",',
     '"Restaurant Name", "Area", "Food Type", "ทำไมต้องกินร้านนี้",',
     '"Recommend Menu 1", "คำอธิบาย Recommend Menu 1",',
@@ -161,7 +178,10 @@ function geminiAutoFill(p) {
     '"Recommend Menu 3", "คำอธิบาย Recommend Menu 3",',
     '"คำอธิบาย Recommend Menu", "Google Rating", "Review Count",',
     '"Price Range", "Location / Address", "Distance / Travel Note",',
-    '"Opening Hours", "Suitable for Group", "Source URL (Google Map)", "Notes"',
+    '"Opening Hours", "Suitable for Group", "Source URL (Google Map)", "Notes",',
+    '"Rating & Review Quality (คุณภาพคะแนนและรีวิว)", "Group Suitability (ความเหมาะกับกลุ่ม)",',
+    '"Price Suitability (ความเหมาะของราคา)", "Travel Convenience (ความสะดวกการเดินทาง)",',
+    '"Data Completeness (ความครบของข้อมูล)", "Uniqueness / Experience (ความพิเศษ/ประสบการณ์)", "คะแนนรวม"',
   ].join("\n");
 
   // Try each model in turn. 429 → next model. Other errors → throw.
@@ -206,6 +226,18 @@ function geminiAutoFill(p) {
     );
   }
   delete parsed.verified;
+
+  // Recalculate total score server-side (safety net in case Gemini mis-sums)
+  const SCORE_COLS = [
+    "Rating & Review Quality (คุณภาพคะแนนและรีวิว)",
+    "Group Suitability (ความเหมาะกับกลุ่ม)",
+    "Price Suitability (ความเหมาะของราคา)",
+    "Travel Convenience (ความสะดวกการเดินทาง)",
+    "Data Completeness (ความครบของข้อมูล)",
+    "Uniqueness / Experience (ความพิเศษ/ประสบการณ์)",
+  ];
+  const scoreSum = SCORE_COLS.reduce((s, k) => s + (parseFloat(parsed[k]) || 0), 0);
+  if (scoreSum > 0) parsed["คะแนนรวม"] = scoreSum;
 
   // Always overwrite with what the user actually submitted
   parsed["Restaurant Name"] = p.restaurantName;
