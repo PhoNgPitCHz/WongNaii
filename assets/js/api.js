@@ -129,12 +129,12 @@ window.WongnaiiAPI = (function () {
  */
 window.buildScoreBars = function (r) {
   const bars = [
-    { label: "คุณภาพคะแนนและรีวิว", value: r.ratingQuality,     max: 25 },
-    { label: "ความเหมาะกับกลุ่ม",   value: r.groupSuitability,  max: 20 },
-    { label: "ความเหมาะของราคา",     value: r.priceSuitability,  max: 15 },
-    { label: "ความสะดวกเดินทาง",     value: r.travelConvenience, max: 15 },
-    { label: "ความครบของข้อมูล",     value: r.dataCompleteness,  max: 15 },
-    { label: "ความพิเศษ/ประสบการณ์", value: r.uniqueness,        max: 10 },
+    { label: "รีวิว",      value: r.ratingQuality,     max: 25 },
+    { label: "เหมาะกลุ่ม", value: r.groupSuitability,  max: 20 },
+    { label: "ราคา",       value: r.priceSuitability,  max: 15 },
+    { label: "เดินทาง",    value: r.travelConvenience, max: 15 },
+    { label: "ข้อมูล",     value: r.dataCompleteness,  max: 15 },
+    { label: "พิเศษ",      value: r.uniqueness,        max: 10 },
   ].filter((b) => b.value != null && b.value > 0);
   if (!bars.length) return "";
   const e = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
