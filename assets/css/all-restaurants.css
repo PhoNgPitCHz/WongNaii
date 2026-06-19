@@ -68,7 +68,7 @@
 }
 .ar-result-count { color: var(--text-muted); font-size: 0.95rem; }
 .ar-result-count strong { color: var(--text-strong); }
-.ar-top-actions { display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; }
+.ar-top-actions { display: flex; gap: var(--space-3); align-items: center; flex-wrap: nowrap; }
 .ar-top-actions select { min-width: 160px; }
 
 /* ---- Card grid (3 cols × 4 rows = 12) ---- */
