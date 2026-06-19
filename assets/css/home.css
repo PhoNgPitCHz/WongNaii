@@ -143,9 +143,13 @@ html { scroll-behavior: smooth; }
 }
 
 .section-block {
-  padding-top:    clamp(3rem, 6vw, 5rem);
+  padding-top:    var(--space-4);
   padding-bottom: clamp(2rem, 4vw, 4rem);
 }
+/* Remove ar-header's own top padding — section-block already provides breathing room */
+.section-block .ar-header { padding-top: 0; }
+/* Tighten quiz top padding — ar-header subtitle is already right above the progress bar */
+.section-block .quiz { padding-top: var(--space-4); }
 
 /* h2 heading inside .ar-header (same visual as h1 on standalone page) */
 .ar-header h2 {

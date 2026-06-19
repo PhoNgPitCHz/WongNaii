@@ -224,6 +224,23 @@
 
     progressEl.querySelectorAll("span").forEach((s) => { s.classList.add("is-done"); s.classList.remove("is-current"); });
 
+    // On home page (WongnaiiDetail available): show as compact floating popup
+    if (window.WongnaiiDetail) {
+      window.WongnaiiDetail.show(choice);
+      stepEl.innerHTML = `
+        <div style="text-align:center; padding: var(--space-6) var(--space-4)">
+          <div class="badge" style="margin-bottom:var(--space-3)">🎯 เราเลือกให้คุณแล้ว</div>
+          <p style="color:var(--text-muted); margin-bottom:var(--space-5); font-size:1.05rem; font-weight:600">${esc(choice.name)}</p>
+          <button class="glass-button is-ghost" id="btn-retry">🎲 สุ่มใหม่</button>
+        </div>
+      `;
+      document.getElementById("btn-retry").addEventListener("click", () => {
+        step = 0; pool = restaurants.slice(); history.length = 0; renderStep();
+      });
+      return;
+    }
+
+    // Standalone page: show result inline inside the quiz card
     stepEl.innerHTML = `
       <div class="quiz-result">
         <div class="badge">🎯 เราเลือกให้คุณแล้ว</div>
